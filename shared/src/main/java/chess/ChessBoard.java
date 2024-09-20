@@ -43,8 +43,8 @@ public class ChessBoard {
      */
     public void resetBoard() {
         pieces = new ChessPiece[8][8];
-        setBoard(ChessGame.TeamColor.BLACK, 1, 2);
-        setBoard(ChessGame.TeamColor.WHITE, 8, 7);
+        setBoard(ChessGame.TeamColor.WHITE, 1, 2);
+        setBoard(ChessGame.TeamColor.BLACK, 8, 7);
     }
 
     private void setBoard(ChessGame.TeamColor color, int side, int pawnLayer){
@@ -58,7 +58,7 @@ public class ChessBoard {
         addPiece(new ChessPosition(side, 8), new ChessPiece(color, ChessPiece.PieceType.ROOK));
 
         for (int column = 1; column < pieces.length + 1; column++) {
-            addPiece(new ChessPosition(pawnLayer, column), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+            addPiece(new ChessPosition(pawnLayer, column), new ChessPiece(color, ChessPiece.PieceType.PAWN));
         }
     }
 
@@ -73,5 +73,12 @@ public class ChessBoard {
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(pieces);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessBoard{" +
+                "pieces=" + Arrays.deepToString(pieces) +
+                '}';
     }
 }

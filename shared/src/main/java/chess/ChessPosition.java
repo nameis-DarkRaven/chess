@@ -9,38 +9,38 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessPosition {
-    private int currentRow;
-    private int currentColumn;
+    private int row;
+    private int column;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessPosition that = (ChessPosition) o;
-        return currentRow == that.currentRow && currentColumn == that.currentColumn;
+        return row == that.row && column == that.column;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(currentRow, currentColumn);
+        return Objects.hash(row, column);
     }
 
     public ChessPosition(int row, int col) {
-        this.currentRow = row;
-        this.currentColumn = col;
+        this.row = row;
+        this.column = col;
     }
 
     /**
      * @return which row this position is in
      * 1 codes for the bottom row
      */
-    public int getRow() {return currentRow;}
+    public int getRow() {return row;}
 
     /**
      * @return which column this position is in
      * 1 codes for the left row
      */
     public int getColumn() {
-        return currentColumn;
+        return column;
     }
 }

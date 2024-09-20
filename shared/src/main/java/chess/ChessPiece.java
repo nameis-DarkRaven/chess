@@ -59,6 +59,14 @@ public class ChessPiece {
         return Objects.hash(color, type);
     }
 
+    @Override
+    public String toString() {
+        return "ChessPiece{" +
+                "color=" + color +
+                ", type=" + type +
+                '}';
+    }
+
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
@@ -173,18 +181,21 @@ public class ChessPiece {
 
     private void addMove(int row, int column, Collection<ChessMove> moves, ChessPosition myPosition, ChessBoard board, ChessPiece.PieceType promotionPiece){
         ChessPosition newPosition = new ChessPosition(row, column);
-        if((board.getPiece(newPosition) == null | board.getPiece(newPosition).color != this.color) && inBoardRange(newPosition)) {
+        if (inBoardRange(newPosition) && board.getPiece(newPosition) == null ) {
+            moves.add(new ChessMove(myPosition, newPosition, promotionPiece));
+        }
+        else if (inBoardRange(newPosition) && board.getPiece(newPosition).color != this.color) {
             moves.add(new ChessMove(myPosition, newPosition, promotionPiece));
         }
     }
 
     private Boolean inBoardRange(int row, int column) {
-        return row <= 8 && row > 0 && column <= 8 && column > 0;
+        return row <= 8 && row > 1 && column <= 8 && column > 1;
     }
 
     private Boolean inBoardRange(ChessPosition position) {
         int row = position.getRow();
         int column = position.getColumn();
-        return row <= 8 && row > 0 && column <= 8 && column > 0;
+        return row <= 8 && row > 1 && column <= 8 && column > 1;
     }
 }
