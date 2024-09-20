@@ -190,12 +190,12 @@ public class ChessPiece {
     }
 
     private Boolean inBoardRange(int row, int column) {
-        return row <= 8 && row > 1 && column <= 8 && column > 1;
+        return row <= 8 && row > 0 && column <= 8 && column > 0;
     }
 
     private Boolean inBoardRange(ChessPosition position) {
         int row = position.getRow();
         int column = position.getColumn();
-        return row <= 8 && row > 1 && column <= 8 && column > 1;
+        return row <= 8 && row > 0 && column <= 8 && column > 0;
     }
 }
