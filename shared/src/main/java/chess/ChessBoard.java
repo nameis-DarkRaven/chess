@@ -23,7 +23,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        pieces[position.getRow()][position.getColumn()] = piece;
+        pieces[8 - position.getRow()][position.getColumn() - 1] = piece;
     }
 
     /**
@@ -34,7 +34,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return pieces[position.getRow()][position.getColumn()];
+        return pieces[8 - position.getRow()][position.getColumn() - 1];
     }
 
     /**
@@ -43,22 +43,22 @@ public class ChessBoard {
      */
     public void resetBoard() {
         pieces = new ChessPiece[8][8];
-        setBoard(ChessGame.TeamColor.BLACK, 0, 1);
-        setBoard(ChessGame.TeamColor.WHITE, 7, 6);
+        setBoard(ChessGame.TeamColor.BLACK, 1, 2);
+        setBoard(ChessGame.TeamColor.WHITE, 8, 7);
     }
 
     private void setBoard(ChessGame.TeamColor color, int side, int pawnLayer){
-        addPiece(new ChessPosition(side, 0), new ChessPiece(color, ChessPiece.PieceType.ROOK));
-        addPiece(new ChessPosition(side, 1), new ChessPiece(color, ChessPiece.PieceType.KNIGHT));
-        addPiece(new ChessPosition(side, 2), new ChessPiece(color, ChessPiece.PieceType.BISHOP));
-        addPiece(new ChessPosition(side, 3), new ChessPiece(color, ChessPiece.PieceType.QUEEN));
-        addPiece(new ChessPosition(side, 4), new ChessPiece(color, ChessPiece.PieceType.KING));
-        addPiece(new ChessPosition(side, 5), new ChessPiece(color, ChessPiece.PieceType.BISHOP));
-        addPiece(new ChessPosition(side, 6), new ChessPiece(color, ChessPiece.PieceType.KNIGHT));
-        addPiece(new ChessPosition(side, 7), new ChessPiece(color, ChessPiece.PieceType.ROOK));
+        addPiece(new ChessPosition(side, 1), new ChessPiece(color, ChessPiece.PieceType.ROOK));
+        addPiece(new ChessPosition(side, 2), new ChessPiece(color, ChessPiece.PieceType.KNIGHT));
+        addPiece(new ChessPosition(side, 3), new ChessPiece(color, ChessPiece.PieceType.BISHOP));
+        addPiece(new ChessPosition(side, 4), new ChessPiece(color, ChessPiece.PieceType.QUEEN));
+        addPiece(new ChessPosition(side, 5), new ChessPiece(color, ChessPiece.PieceType.KING));
+        addPiece(new ChessPosition(side, 6), new ChessPiece(color, ChessPiece.PieceType.BISHOP));
+        addPiece(new ChessPosition(side, 7), new ChessPiece(color, ChessPiece.PieceType.KNIGHT));
+        addPiece(new ChessPosition(side, 8), new ChessPiece(color, ChessPiece.PieceType.ROOK));
 
         for (int column = 1; column < pieces.length + 1; column++) {
-            addPiece(new ChessPosition(pawnLayer, column-1), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+            addPiece(new ChessPosition(pawnLayer, column), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
         }
     }
 
