@@ -1,8 +1,6 @@
 package chess;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -12,9 +10,10 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    private ChessPiece[][] pieces = new ChessPiece[7][7];
+    private ChessPiece[][] pieces;
+
     public ChessBoard() {
-        
+        resetBoard();
     }
 
     /**
@@ -24,7 +23,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        pieces[position.getCurrent_row()][position.getColumn()] = piece;
+        pieces[position.getRow()][position.getColumn()] = piece;
     }
 
     /**
@@ -35,7 +34,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return pieces[position.getCurrent_row()][position.getColumn()];
+        return pieces[position.getRow()][position.getColumn()];
     }
 
     /**
@@ -43,7 +42,24 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        pieces = new ChessPiece[8][8];
+        setBoard(ChessGame.TeamColor.BLACK, 0, 1);
+        setBoard(ChessGame.TeamColor.WHITE, 7, 6);
+    }
+
+    private void setBoard(ChessGame.TeamColor color, int side, int pawnLayer){
+        addPiece(new ChessPosition(side, 0), new ChessPiece(color, ChessPiece.PieceType.ROOK));
+        addPiece(new ChessPosition(side, 1), new ChessPiece(color, ChessPiece.PieceType.KNIGHT));
+        addPiece(new ChessPosition(side, 2), new ChessPiece(color, ChessPiece.PieceType.BISHOP));
+        addPiece(new ChessPosition(side, 3), new ChessPiece(color, ChessPiece.PieceType.QUEEN));
+        addPiece(new ChessPosition(side, 4), new ChessPiece(color, ChessPiece.PieceType.KING));
+        addPiece(new ChessPosition(side, 5), new ChessPiece(color, ChessPiece.PieceType.BISHOP));
+        addPiece(new ChessPosition(side, 6), new ChessPiece(color, ChessPiece.PieceType.KNIGHT));
+        addPiece(new ChessPosition(side, 7), new ChessPiece(color, ChessPiece.PieceType.ROOK));
+
+        for (int column = 1; column < pieces.length + 1; column++) {
+            addPiece(new ChessPosition(pawnLayer, column-1), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+        }
     }
 
     @Override
