@@ -145,7 +145,7 @@ public class ChessPiece {
         if (this.color == ChessGame.TeamColor.WHITE) {
             if (row == 2) {
                 addMove(row + 1, column, possibleMoves, myPosition, board, null);
-                if (board.getPiece(new ChessPosition(row + 2, column)) == null) {
+                if (board.getPiece(new ChessPosition(row + 1, column)) == null && board.getPiece(new ChessPosition(row + 2, column)) == null) {
                     addMove(row + 2, column, possibleMoves, myPosition, board, null);
                 }
             }
@@ -154,14 +154,19 @@ public class ChessPiece {
                 addMove(row + 1, column, possibleMoves, myPosition, board, PieceType.BISHOP);
                 addMove(row + 1, column, possibleMoves, myPosition, board, PieceType.KNIGHT);
                 addMove(row + 1, column, possibleMoves, myPosition, board, PieceType.ROOK);
-                addPawnMove(row + 1, column + 1, possibleMoves, myPosition, board);
-                addPawnMove(row + 1, column - 1, possibleMoves, myPosition, board);
+                addPawnPromotionMove(row + 1, column + 1, possibleMoves, myPosition, board);
+                addPawnPromotionMove(row + 1, column - 1, possibleMoves, myPosition, board);
             }
+            addMove(row + 1, column, possibleMoves, myPosition, board, null);
+            addPawnMove(row + 1, column + 1, possibleMoves, myPosition, board);
+            addPawnMove(row + 1, column - 1, possibleMoves, myPosition, board);
+
+
         }
         if (this.color == ChessGame.TeamColor.BLACK) {
             if (row == 7) {
                 addMove(row - 1, column, possibleMoves, myPosition, board, null);
-                if (board.getPiece(new ChessPosition(row - 2, column)) == null) {
+                if (board.getPiece(new ChessPosition(row - 1, column)) == null && board.getPiece(new ChessPosition(row - 2, column)) == null) {
                     addMove(row - 2, column, possibleMoves, myPosition, board, null);
                 }
             }
@@ -170,9 +175,12 @@ public class ChessPiece {
                 addMove(row - 1, column, possibleMoves, myPosition, board, PieceType.BISHOP);
                 addMove(row - 1, column, possibleMoves, myPosition, board, PieceType.KNIGHT);
                 addMove(row - 1, column, possibleMoves, myPosition, board, PieceType.ROOK);
-                addPawnMove(row - 1, column + 1, possibleMoves, myPosition, board);
-                addPawnMove(row - 1, column - 1, possibleMoves, myPosition, board);
+                addPawnPromotionMove(row - 1, column + 1, possibleMoves, myPosition, board);
+                addPawnPromotionMove(row - 1, column - 1, possibleMoves, myPosition, board);
             }
+            addMove(row - 1, column, possibleMoves, myPosition, board, null);
+            addPawnMove(row - 1, column + 1, possibleMoves, myPosition, board);
+            addPawnMove(row - 1, column - 1, possibleMoves, myPosition, board);
         }
         return possibleMoves;
     }
@@ -186,9 +194,16 @@ public class ChessPiece {
         }
     }
 
-    private void addPawnMove(int row, int column, Collection<ChessMove> moves, ChessPosition myPosition, ChessBoard board) {
+    private void addPawnMove(int row, int column, Collection<ChessMove> moves, ChessPosition myPosition, ChessBoard board){
         ChessPosition newPosition = new ChessPosition(row, column);
-        if (board.getPiece(newPosition) != null && board.getPiece(newPosition).color != this.color) {
+        if (inBoardRange(newPosition) && board.getPiece(newPosition) != null && board.getPiece(newPosition).color != this.color) {
+            moves.add(new ChessMove(myPosition, newPosition, null));
+        }
+    }
+
+    private void addPawnPromotionMove(int row, int column, Collection<ChessMove> moves, ChessPosition myPosition, ChessBoard board) {
+        ChessPosition newPosition = new ChessPosition(row, column);
+        if ((board.getPiece(newPosition) != null && board.getPiece(newPosition).color != this.color)) {
             addMove(row, column, moves, myPosition, board, PieceType.QUEEN);
             addMove(row, column, moves, myPosition, board, PieceType.BISHOP);
             addMove(row, column, moves, myPosition, board, PieceType.ROOK);
