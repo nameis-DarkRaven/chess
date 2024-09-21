@@ -54,4 +54,13 @@ public class ChessMove {
     public int hashCode() {
         return Objects.hash(start, end, type);
     }
+
+    @Override
+    public String toString() {
+        return "ChessMove{" +
+                "start=" + start +
+                ", end=" + end +
+                ", type=" + type +
+                '}';
+    }
 }
