@@ -153,8 +153,8 @@ public class ChessPiece {
                 addMove(row + 1, column, possibleMoves, myPosition, board, PieceType.BISHOP);
                 addMove(row + 1, column, possibleMoves, myPosition, board, PieceType.KNIGHT);
                 addMove(row + 1, column, possibleMoves, myPosition, board, PieceType.ROOK);
-                addPawnPromotionMove(row + 1, column + 1, possibleMoves, myPosition, board);
-                addPawnPromotionMove(row + 1, column - 1, possibleMoves, myPosition, board);
+                addPawnCapturePromotionMove(row + 1, column + 1, possibleMoves, myPosition, board);
+                addPawnCapturePromotionMove(row + 1, column - 1, possibleMoves, myPosition, board);
             } else {
                 addMove(row + 1, column, possibleMoves, myPosition, board, null);
                 addPawnMove(row + 1, column + 1, possibleMoves, myPosition, board, null);
@@ -174,8 +174,8 @@ public class ChessPiece {
                 addMove(row - 1, column, possibleMoves, myPosition, board, PieceType.BISHOP);
                 addMove(row - 1, column, possibleMoves, myPosition, board, PieceType.KNIGHT);
                 addMove(row - 1, column, possibleMoves, myPosition, board, PieceType.ROOK);
-                addPawnPromotionMove(row - 1, column + 1, possibleMoves, myPosition, board);
-                addPawnPromotionMove(row - 1, column - 1, possibleMoves, myPosition, board);
+                addPawnCapturePromotionMove(row - 1, column + 1, possibleMoves, myPosition, board);
+                addPawnCapturePromotionMove(row - 1, column - 1, possibleMoves, myPosition, board);
             } else {
                 addMove(row - 1, column, possibleMoves, myPosition, board, null);
                 addPawnMove(row - 1, column + 1, possibleMoves, myPosition, board, null);
@@ -201,7 +201,7 @@ public class ChessPiece {
         }
     }
 
-    private void addPawnPromotionMove(int row, int column, Collection<ChessMove> moves, ChessPosition myPosition, ChessBoard board) {
+    private void addPawnCapturePromotionMove(int row, int column, Collection<ChessMove> moves, ChessPosition myPosition, ChessBoard board) {
         ChessPosition newPosition = new ChessPosition(row, column);
         if ((board.getPiece(newPosition) != null && board.getPiece(newPosition).color != this.color)) {
             addPawnMove(row, column, moves, myPosition, board, PieceType.QUEEN);
