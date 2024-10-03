@@ -26,6 +26,10 @@ public class ChessBoard {
         pieces[8 - position.getRow()][position.getColumn() - 1] = piece;
     }
 
+    public ChessPiece[][] getPieces() {
+        return pieces;
+    }
+
     /**
      * Gets a chess piece on the chessboard
      *
@@ -47,7 +51,7 @@ public class ChessBoard {
         setBoard(ChessGame.TeamColor.BLACK, 8, 7);
     }
 
-    private void setBoard(ChessGame.TeamColor color, int side, int pawnLayer){
+    private void setBoard(ChessGame.TeamColor color, int side, int pawnLayer) {
         addPiece(new ChessPosition(side, 1), new ChessPiece(color, ChessPiece.PieceType.ROOK));
         addPiece(new ChessPosition(side, 2), new ChessPiece(color, ChessPiece.PieceType.KNIGHT));
         addPiece(new ChessPosition(side, 3), new ChessPiece(color, ChessPiece.PieceType.BISHOP));
