@@ -75,27 +75,25 @@ public class ChessGame {
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
      */
-//    public boolean isInCheck(TeamColor teamColor) {
-//        Collection<ChessMove> possibleMoves = new ArrayList<>();
-//        for (int i = 1; i < board.getPieces().length; i++) {
-//            for (int j = 1; i < board.getPieces().length; j++) {
-//                if (board.getPieces()[i][j] != null) {
-//                    ChessPosition k = new ChessPosition(i, j);
-//                    ChessPiece piece = board.getPiece(k);
-//                    if (piece.getPieceType() != null) {
-//                        possibleMoves.addAll(piece.pieceMoves(board, k));
-//                    }
-//                }
-//            }
-//            for (ChessMove move : possibleMoves) {
-//                ChessPiece piece = board.getPiece(move.getEndPosition());
-//                if (piece.getPieceType() == ChessPiece.PieceType.KING) {
-//                    return true;
-//                }
-//            }
-//        }
-//        return false;
-//    }
+    public boolean isInCheck(TeamColor teamColor) {
+        Collection<ChessMove> possibleMoves = new ArrayList<>();
+        for (int i = 1; i < board.getPieces().length + 1; i++) {
+            for (int j = 1; j < board.getPieces().length + 1; j++) {
+                if (board.getPieces()[i-1][j-1] != null && board.getPieces()[i-1][j-1].getTeamColor() == teamColor) {
+                    ChessPosition position = new ChessPosition(i, j);
+                    ChessPiece piece = board.getPiece(position);
+                    possibleMoves.addAll(piece.pieceMoves(board, position));
+                }
+            }
+            for (ChessMove move : possibleMoves) {
+                ChessPiece piece = board.getPiece(move.getEndPosition());
+                if (board.getPieces()[move.getEndPosition().getRow() - 1][move.getEndPosition().getColumn() - 1] != null && piece.getPieceType() == ChessPiece.PieceType.KING) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     /**
      * Determines if the given team is in checkmate
