@@ -92,12 +92,17 @@ public class ChessGame {
                 validMoves(start).contains(move) &&
                 !isInCheck(board.getPiece(start).getTeamColor()) &&
                 board.getPiece(start).getTeamColor() == teamTurn) {
-            board.addPiece(move.getEndPosition(), board.getPiece(start));
-            board.addPiece(start, null);
-            if (teamTurn == TeamColor.WHITE) {
-                teamTurn = TeamColor.BLACK;
+            if (move.getPromotionPiece() == null) {
+                board.addPiece(move.getEndPosition(), board.getPiece(start));
+                board.addPiece(start, null);
             } else {
-                teamTurn = TeamColor.WHITE;
+                board.addPiece(move.getEndPosition(), new ChessPiece(this.teamTurn, move.getPromotionPiece()));
+                board.addPiece(start, null);
+            }
+            if (teamTurn == TeamColor.WHITE) {
+                setTeamTurn(TeamColor.BLACK);
+            } else {
+                setTeamTurn(TeamColor.WHITE);
             }
         } else {
             throw new InvalidMoveException();
@@ -131,19 +136,16 @@ public class ChessGame {
                             if (board.getPieces()[8 - k][j - 1] != null) {
                                 ChessPosition position = new ChessPosition(k, j);
                                 if (board.getPiece(position).getPieceType() == ChessPiece.PieceType.KING && board.getPiece(position).getTeamColor() == teamColor) {
+                                    inCheck = true;
                                     kingMoves = board.getPiece(position).pieceMoves(board, position);
                                 }
                             }
                         }
                     }
-                    inCheck = true;
-                    for (ChessMove kingMove : kingMoves) {
-                        if (willBeInCheck(teamColor, kingMove)) {
-                            return true;
-                        } else {
-                            inCheck = false;
-                        }
+                    for(ChessMove kingMove: kingMoves){
+
                     }
+
                 }
             }
         }
@@ -200,7 +202,7 @@ public class ChessGame {
             }
         }
         for (ChessMove move : kingMoves) {
-            if (willBeInCheck(teamColor, move)) {
+            if (!willBeInCheck(teamColor, move)) {
                 return false;
             }
         }
