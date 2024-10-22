@@ -10,5 +10,10 @@ public class Main {
     }
 }
 
-//UUID.randomUUID().toString()
+//import java.util.UUID;
+// ...
+//
+//public static String generateToken() {
+//    return UUID.randomUUID().toString();
+//}
 //How to generate an auth token ^.
