@@ -4,12 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
-/**
- * For a class that can manage a chess game, making moves on a board
- * <p>
- * Note: You can add to this class, but you may not alter
- * signature of the existing methods.
- */
+
 public class ChessGame {
     private TeamColor teamTurn;
     private ChessBoard board;
@@ -20,25 +15,16 @@ public class ChessGame {
         board.resetBoard();
     }
 
-    /**
-     * @return Which team's turn it is
-     */
     public TeamColor getTeamTurn() {
         return teamTurn;
     }
 
-    /**
-     * Set's which teams turn it is
-     *
-     * @param team the team whose turn it is
-     */
+
     public void setTeamTurn(TeamColor team) {
         this.teamTurn = team;
     }
 
-    /**
-     * Enum identifying the 2 possible teams in a chess game
-     */
+
     public enum TeamColor {
         WHITE,
         BLACK
@@ -105,12 +91,7 @@ public class ChessGame {
         return moves;
     }
 
-    /**
-     * Determines if the given team is in check
-     *
-     * @param teamColor which team to check for check
-     * @return True if the specified team is in check
-     */
+
     public boolean isInCheck(TeamColor teamColor) {
         Collection<ChessMove> possibleMoves = new ArrayList<>();
         if(teamColor == TeamColor.WHITE){possibleMoves = getPossibleMoves(TeamColor.BLACK);}
@@ -124,6 +105,8 @@ public class ChessGame {
         return false;
     }
 
+
+    /** Used by isInStalemate and isInCheckMate to see if a piece will be in check if a certain move is made.*/
     private boolean willBeInCheck(TeamColor teamColor, ChessMove move) {
         ChessPiece temp = board.getPiece(move.getEndPosition());
         board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
@@ -142,13 +125,7 @@ public class ChessGame {
         return false;
     }
 
-    /**
-     * Determines if the given team is in stalemate, which here is defined as having
-     * no valid moves
-     *
-     * @param teamColor which team to check for stalemate
-     * @return True if the specified team is in stalemate, otherwise false
-     */
+
     public boolean isInStalemate(TeamColor teamColor) {
         if (isInCheck(teamColor)) {
             return false;
@@ -165,13 +142,6 @@ public class ChessGame {
         return isStalemate;
     }
 
-    /**
-     * Determines if the given team is in checkmate
-     *
-     * @param teamColor which team to check for checkmate
-     * @return True if the specified team is in checkmate
-     */
-
     public boolean isInCheckmate(TeamColor teamColor) {
         boolean isCheckmate = false;
         Collection<ChessMove> moves = getPossibleMoves(teamColor);
@@ -186,20 +156,12 @@ public class ChessGame {
         return isCheckmate;
     }
 
-    /**
-     * Sets this game's chessboard with a given board
-     *
-     * @param board the new board to use
-     */
+
     public void setBoard(ChessBoard board) {
         this.board = board;
     }
 
-    /**
-     * Gets the current chessboard
-     *
-     * @return the chessboard
-     */
+
     public ChessBoard getBoard() {
         return board;
     }

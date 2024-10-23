@@ -5,12 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Represents a single chess piece
- * <p>
- * Note: You can add to this class, but you may not alter
- * signature of the existing methods.
- */
+
 public class ChessPiece {
     private ChessGame.TeamColor color;
     private PieceType type;
@@ -20,9 +15,7 @@ public class ChessPiece {
         this.type = type;
     }
 
-    /**
-     * The various different chess piece options
-     */
+    /** The various different chess piece options. */
     public enum PieceType {
         KING,
         QUEEN,
@@ -32,16 +25,10 @@ public class ChessPiece {
         PAWN
     }
 
-    /**
-     * @return Which team this chess piece belongs to
-     */
     public ChessGame.TeamColor getTeamColor() {
         return color;
     }
 
-    /**
-     * @return which type of chess piece this piece is
-     */
     public PieceType getPieceType() {
         return type;
     }
@@ -68,12 +55,8 @@ public class ChessPiece {
     }
 
     /**
-     * Calculates all the positions a chess piece can move to
-     * Does not take into account moves that are illegal due to leaving the king in
-     * danger
-     *
-     * @return Collection of valid moves
-     */
+     * Calculates all the positions a chess piece can move to.
+     * Does not take into account moves that are illegal due to leaving the king in danger. */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         return switch (this.type) {
             case PieceType.KING -> kingMoves(board, myPosition);
@@ -84,7 +67,6 @@ public class ChessPiece {
             case PieceType.PAWN -> pawnMoves(board, myPosition);
         };
     }
-
 
     private Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition myPosition) {
         int row = myPosition.getRow(), column = myPosition.getColumn();
@@ -185,6 +167,8 @@ public class ChessPiece {
         return possibleMoves;
     }
 
+    /** A method to add a move to a piece's possible moves.
+     *  Used for all pieces except diagonal pawn moves. */
     private void addMove(int row, int column, Collection<ChessMove> moves, ChessPosition myPosition, ChessBoard board, ChessPiece.PieceType promotionPiece) {
         ChessPosition newPosition = new ChessPosition(row, column);
         if (inBoardRange(newPosition) && board.getPiece(newPosition) == null) {
@@ -194,6 +178,7 @@ public class ChessPiece {
         }
     }
 
+    /** A method to add a diagonal pawn move to a pawn's possible moves. */
     private void addPawnMove(int row, int column, Collection<ChessMove> moves, ChessPosition myPosition, ChessBoard board, ChessPiece.PieceType promotionPiece) {
         ChessPosition newPosition = new ChessPosition(row, column);
         if (inBoardRange(newPosition) && board.getPiece(newPosition) != null && board.getPiece(newPosition).color != this.color) {
@@ -201,6 +186,7 @@ public class ChessPiece {
         }
     }
 
+    /** A method to add promotion moves to a pawn's possible moves. */
     private void addPawnCapturePromotionMove(int row, int column, Collection<ChessMove> moves, ChessPosition myPosition, ChessBoard board) {
         ChessPosition newPosition = new ChessPosition(row, column);
         if ((board.getPiece(newPosition) != null && board.getPiece(newPosition).color != this.color)) {
@@ -211,7 +197,8 @@ public class ChessPiece {
         }
     }
 
-
+    /** Checks to see if a range of moves is possible.
+     *  Used for bishop and rook moves. */
     private void checkMove(int rowMove, int columnMove, ChessPosition myPosition, Collection<ChessMove> possibleMoves, ChessBoard board) {
         int row = myPosition.getRow(), column = myPosition.getColumn();
         boolean isPiece = false;
@@ -227,6 +214,8 @@ public class ChessPiece {
         }
     }
 
+    /** Two of the same method with different parameters for convenience.
+     *  Says whether a move would be within the range of the board. */
     private Boolean inBoardRange(int row, int column) {
         return row <= 8 && row > 0 && column <= 8 && column > 0;
     }
