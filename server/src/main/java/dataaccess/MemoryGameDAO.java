@@ -44,10 +44,10 @@ public class MemoryGameDAO implements GameDAO {
 
     @Override
     public void clear() throws DataAccessException {
-        if (!gameData.isEmpty()) {
+        if (gameData != null) {
             gameData.clear();
         }
-        if (!ids.isEmpty()) {
+        if (ids != null) {
             ids.clear();
         }
     }

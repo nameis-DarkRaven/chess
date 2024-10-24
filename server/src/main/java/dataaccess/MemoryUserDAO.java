@@ -24,7 +24,7 @@ public class MemoryUserDAO implements UserDAO {
 
     @Override
     public void clear() throws DataAccessException {
-        if (!users.isEmpty()) {
+        if (users != null) {
             users.clear();
         }
     }
