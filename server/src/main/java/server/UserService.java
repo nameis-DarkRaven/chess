@@ -57,11 +57,12 @@ public class UserService {
         }
     }
 
-    public LogoutResult logout(LogoutRequest request)throws DataAccessException {
-        try{
+    public LogoutResult logout(LogoutRequest request) throws DataAccessException {
+        try {
             AuthData auth = auths.getAuth(request.authToken());
+            auths.deleteAuth(auth.authToken());
             return new LogoutResult();
-        }catch(DataAccessException e){
+        } catch (DataAccessException e) {
             throw new DataAccessException(e.getMessage());
         }
 
