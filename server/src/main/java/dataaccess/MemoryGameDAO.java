@@ -3,18 +3,15 @@ package dataaccess;
 import chess.ChessGame;
 import model.GameData;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class MemoryGameDAO implements GameDAO {
     private Collection<GameData> gameData;
-    private Collection<Integer> ids;
+    private ArrayList<Integer> ids;
 
     private int createGameID(){
-        int id = 1;
-        while (ids.contains(id)){
-            id++;
-        }
-        return id;
+        return ids.get(-1)+ 1;
     }
 
     @Override
