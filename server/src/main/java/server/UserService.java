@@ -1,13 +1,69 @@
 package server;
+
+import dataaccess.AuthDAO;
+import dataaccess.DataAccessException;
+import dataaccess.UserDAO;
 import model.UserData;
 import model.AuthData;
 
+import java.util.UUID;
+
 public class UserService {
-    public AuthData register(UserData user) {
-        return null;
+    private UserDAO users;
+    private AuthDAO auths;
+
+    public UserService(UserDAO users, AuthDAO auths) {
+        this.users = users;
+        this.auths = auths;
     }
-    public AuthData login(UserData user) {
-        return null;
+
+    public String generateToken() {
+        return UUID.randomUUID().toString();
     }
-    public void logout(AuthData auth) {}
+
+    public RegisterResult register(RegisterRequest request) throws DataAccessException, BadRequestException, AlreadyTakenException {
+        try {
+            if (request.username() == null || request.password() == null) {
+                throw new BadRequestException("Error: Invalid username or password.");
+            }
+            UserData user = new UserData(request.username(), request.password(), request.email());
+            if (users.getUser(user.username()) != null) {
+                throw new AlreadyTakenException("Error: Username already taken.");
+            }
+            users.createUser(user);
+            String authToken = generateToken();
+            auths.createAuth(new AuthData(authToken, user.username()));
+            AuthData auth = auths.getAuth(authToken);
+            return new RegisterResult(auth.username(), auth.authToken());
+        } catch (DataAccessException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    public LoginResult login(LoginRequest request) throws DataAccessException, BadRequestException, UnauthorizedException {
+        try {
+            if (request.username() == null || request.password() == null) {
+                throw new BadRequestException("Error: Invalid username or password.");
+            }
+            if (users.getUser(request.username()) == null) {
+                throw new UnauthorizedException("Error: Username does not exist.");
+            }
+            String authToken = generateToken();
+            auths.createAuth(new AuthData(authToken, request.username()));
+            AuthData auth = auths.getAuth(authToken);
+            return new LoginResult(auth.username(), auth.authToken());
+        } catch (DataAccessException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    public LogoutResult logout(LogoutRequest request)throws DataAccessException {
+        try{
+            AuthData auth = auths.getAuth(request.authToken());
+            return new LogoutResult();
+        }catch(DataAccessException e){
+            throw new DataAccessException(e.getMessage());
+        }
+
+    }
 }
