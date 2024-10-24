@@ -4,27 +4,29 @@ import model.UserData;
 
 import java.util.Collection;
 
-public class MemoryUserDAO implements UserDAO{
+public class MemoryUserDAO implements UserDAO {
     private Collection<UserData> users;
+
     @Override
-    public void createUser(UserData user)throws DataAccessException {
+    public void createUser(UserData user) throws DataAccessException {
         users.add(user);
     }
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
-        for(UserData user: users){
-            if (user.username().equals(username)){
+        for (UserData user : users) {
+            if (user.username().equals(username)) {
                 return user;
             }
         }
-        return  null;
+        return null;
     }
 
     @Override
-    public void clear() throws DataAccessException{
-        users.clear();
+    public void clear() throws DataAccessException {
+        if (!users.isEmpty()) {
+            users.clear();
+        }
     }
-//    public Collection<UserData> getUsers(){return users;}
 
 }

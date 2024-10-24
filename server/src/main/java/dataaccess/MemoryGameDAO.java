@@ -10,12 +10,12 @@ public class MemoryGameDAO implements GameDAO {
     private Collection<GameData> gameData;
     private ArrayList<Integer> ids;
 
-    private int createGameID(){
-        return ids.get(-1)+ 1;
+    private int createGameID() {
+        return ids.get(-1) + 1;
     }
 
     @Override
-    public int createGame(String gameName) throws DataAccessException{
+    public int createGame(String gameName) throws DataAccessException {
         int gameID = createGameID();
         gameData.add(new GameData(gameID, null, null, gameName, new ChessGame()));
         return gameID;
@@ -23,8 +23,10 @@ public class MemoryGameDAO implements GameDAO {
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
-        for(GameData game: gameData){
-            if (game.gameID() == gameID){return game;}
+        for (GameData game : gameData) {
+            if (game.gameID() == gameID) {
+                return game;
+            }
         }
         throw new DataAccessException("Game does not exist.");
     }
@@ -35,15 +37,19 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void updateGame(int gameID, GameData game)throws DataAccessException{
+    public void updateGame(int gameID, GameData game) throws DataAccessException {
         gameData.remove(game);
         gameData.add(new GameData(gameID, game.whiteUsername(), game.blackUsername(), game.gameName(), game.game()));
     }
 
     @Override
-    public void clear() throws DataAccessException{
-        gameData.clear();
-        ids.clear();
+    public void clear() throws DataAccessException {
+        if (!gameData.isEmpty()) {
+            gameData.clear();
+        }
+        if (!ids.isEmpty()) {
+            ids.clear();
+        }
     }
 
 

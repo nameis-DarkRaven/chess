@@ -31,6 +31,8 @@ public class MemoryAuthDAO implements AuthDAO {
 
     @Override
     public void clear() throws DataAccessException {
-        auths.clear();
+        if (!auths.isEmpty()) {
+            auths.clear();
+        }
     }
 }
