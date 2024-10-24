@@ -9,11 +9,3 @@ public class Main {
         server.run(8080);
     }
 }
-
-//import java.util.UUID;
-// ...
-//
-//public static String generateToken() {
-//    return UUID.randomUUID().toString();
-//}
-//How to generate an auth token ^.
