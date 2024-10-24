@@ -7,23 +7,24 @@ import java.util.Collection;
 public class MemoryUserDAO implements UserDAO{
     private Collection<UserData> users;
     @Override
-    public void createUser(UserData user) {
+    public void createUser(UserData user)throws DataAccessException {
         users.add(user);
     }
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
         for(UserData user: users){
-            if (user.username() == username){
+            if (user.username().equals(username)){
                 return user;
             }
         }
-        throw new DataAccessException("User does not exist.");
+        return  null;
     }
 
     @Override
-    public void clear() {
+    public void clear() throws DataAccessException{
         users.clear();
     }
+//    public Collection<UserData> getUsers(){return users;}
 
 }

@@ -8,12 +8,8 @@ import java.util.UUID;
 public class MemoryAuthDAO implements AuthDAO {
     private Collection<AuthData> auths;
 
-    public String generateToken() {
-        return UUID.randomUUID().toString();
-    }
-
     @Override
-    public void createAuth(AuthData auth) {
+    public void createAuth(AuthData auth) throws DataAccessException {
         auths.add(auth);
     }
 
@@ -34,7 +30,7 @@ public class MemoryAuthDAO implements AuthDAO {
     }
 
     @Override
-    public void clear() {
+    public void clear() throws DataAccessException {
         auths.clear();
     }
 }
