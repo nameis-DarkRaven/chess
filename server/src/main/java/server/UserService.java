@@ -42,11 +42,11 @@ public class UserService {
 
     public LoginResult login(LoginRequest request) throws DataAccessException, BadRequestException, UnauthorizedException {
         try {
-            if (request.username() == null || request.password() == null) {
+            if (request.username() == null || request.password() == null || users.getUser(request.username()) == null) {
                 throw new BadRequestException("Error: Invalid username or password.");
             }
-            if (users.getUser(request.username()) == null) {
-                throw new UnauthorizedException("Error: Username does not exist.");
+            if(!request.password().equals(users.getUser(request.username()).password())){
+                throw new UnauthorizedException("Error: Incorrect username or password.");
             }
             String authToken = generateToken();
             auths.createAuth(new AuthData(authToken, request.username()));

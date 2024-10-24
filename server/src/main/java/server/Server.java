@@ -10,11 +10,11 @@ import javax.xml.crypto.Data;
 
 public class Server {
 
-    private UserService userService;
-    private GameService gameService;
     private final UserDAO users = new MemoryUserDAO();
     private final AuthDAO auths = new MemoryAuthDAO();
     private final GameDAO games = new MemoryGameDAO();
+    private UserService userService = new UserService(users, auths);
+    private GameService gameService = new GameService(auths, games);
 
 
     public int run(int desiredPort) {
@@ -32,7 +32,7 @@ public class Server {
         Spark.delete("/db", this::clear);
 
         //This line initializes the server and can be removed once you have a functioning endpoint 
-        Spark.init();
+
 
         Spark.awaitInitialization();
         return Spark.port();
@@ -56,7 +56,7 @@ public class Server {
 
     public Object register(Request request, Response response) {
         try {
-            var user = new Gson().fromJson(request.toString(), RegisterRequest.class); //The toString() portion here is probably wrong.
+            var user = new Gson().fromJson(request.body(), RegisterRequest.class); //The toString() portion here is probably wrong.
             RegisterResult registerResult = userService.register(user);
             response.status(200);
             return new Gson().toJson(registerResult);
@@ -77,7 +77,7 @@ public class Server {
 
     public Object login(Request request, Response response) {
         try {
-            var user = new Gson().fromJson(request.toString(), LoginRequest.class); //The toString() portion here is probably wrong.
+            var user = new Gson().fromJson(request.body(), LoginRequest.class); //The toString() portion here is probably wrong.
             LoginResult loginResult = userService.login(user);
             response.status(200);
             return new Gson().toJson(loginResult);
@@ -93,7 +93,7 @@ public class Server {
 
     public Object logout(Request request, Response response) {
         try {
-            var user = new Gson().fromJson(request.toString(), LogoutRequest.class);
+            var user = new Gson().fromJson(request.body(), LogoutRequest.class);
             userService.logout(user);
             response.status(200);
             return "";
@@ -110,7 +110,7 @@ public class Server {
 
     public Object listGames(Request request, Response response) throws DataAccessException, ResponseException {
         try {
-            var auth = new Gson().fromJson(request.toString(), ListGamesRequest.class);
+            var auth = new Gson().fromJson(request.body(), ListGamesRequest.class);
             ListGamesResult listGamesResult = gameService.listGames(auth);
             response.status(200);
             return new Gson().toJson(listGamesResult);
@@ -126,7 +126,7 @@ public class Server {
 
     public Object createGame(Request request, Response response) {
         try {
-            var game = new Gson().fromJson(request.toString(), CreateGameRequest.class);
+            var game = new Gson().fromJson(request.body(), CreateGameRequest.class);
             CreateGameResult createGameResult = gameService.createGame(game);
             response.status(200);
             return new Gson().toJson(createGameResult);
@@ -145,7 +145,7 @@ public class Server {
 
     public Object joinGame(Request request, Response response) {
         try {
-            var game = new Gson().fromJson(request.toString(), JoinGameRequest.class);
+            var game = new Gson().fromJson(request.body(), JoinGameRequest.class);
             JoinGameResult joinGameResult = gameService.joinGame(game);
             response.status(200);
             return "";
