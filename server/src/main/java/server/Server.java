@@ -159,7 +159,7 @@ public class Server {
             response.status(200);
             return "";
 
-        } catch (DataAccessException e) {
+        } catch (UnauthorizedException e) {
             response.status(401);
             return new Gson().toJson(new ErrorMessage(e.getMessage()));
         } catch (BadRequestException e) {
@@ -170,6 +170,9 @@ public class Server {
             response.status(403);
             return new Gson().toJson(new ErrorMessage(e.getMessage()));
 
+        } catch (DataAccessException e) {
+            response.status(500);
+            return new Gson().toJson(new ErrorMessage(e.getMessage()));
         }
     }
 

@@ -56,20 +56,20 @@ public class GameService {
                 if (game.blackUsername() == null) {
                     games.updateGame(game.gameID(), new GameData(game.gameID(), game.whiteUsername(), user.username(), game.gameName(), game.game()));
                 } else {
-                    throw new AlreadyTakenException("Error: Black is already taken.");
+                    throw new AlreadyTakenException("Error: Another player has already taken that spot.");
                 }
             } else if (request.playerColor() == ChessGame.TeamColor.WHITE) {
                 if (game.whiteUsername() == null) {
                     games.updateGame(game.gameID(), new GameData(game.gameID(), user.username(), game.blackUsername(), game.gameName(), game.game()));
                 } else {
-                    throw new AlreadyTakenException("Error: Black is already taken.");
+                    throw new AlreadyTakenException("Error: Another player has already taken that spot.");
                 }
             } else {
                 throw new BadRequestException("Error: Invalid request.");
             }
             return new JoinGameResult();
         } catch (DataAccessException e) {
-            throw new DataAccessException("Error: Unauthorized access.");
+            throw new UnauthorizedException("Error: Unauthorized access.");
         }
     }
 
