@@ -1,4 +1,4 @@
-package server;
+package results;
 
 public record JoinGameResult() {
 }
