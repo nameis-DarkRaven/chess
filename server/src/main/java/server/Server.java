@@ -42,10 +42,6 @@ public class Server {
         Spark.awaitStop();
     }
 
-    private void exceptionHandler(ResponseException exception, Request request, Response response) {
-        response.status(exception.StatusCode());
-    }
-
     public Object clear(Request request, Response response) throws DataAccessException {
         try {
             auths.clear();
@@ -113,7 +109,7 @@ public class Server {
         }
     }
 
-    public Object listGames(Request request, Response response) throws DataAccessException, ResponseException {
+    public Object listGames(Request request, Response response) throws DataAccessException {
         try {
             var auth = request.headers("authorization");
             ListGamesResult listGamesResult = gameService.listGames(new ListGamesRequest(auth));
