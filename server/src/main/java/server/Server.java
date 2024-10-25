@@ -57,7 +57,7 @@ public class Server {
 
     public Object register(Request request, Response response) {
         try {
-            var user = new Gson().fromJson(request.body(), RegisterRequest.class); //The toString() portion here is probably wrong.
+            RegisterRequest user = new Gson().fromJson(request.body(), RegisterRequest.class); //The toString() portion here is probably wrong.
             RegisterResult registerResult = userService.register(user);
             response.status(200);
             return new Gson().toJson(registerResult);
@@ -78,7 +78,7 @@ public class Server {
 
     public Object login(Request request, Response response) {
         try {
-            var user = new Gson().fromJson(request.body(), LoginRequest.class); //The toString() portion here is probably wrong.
+            LoginRequest user = new Gson().fromJson(request.body(), LoginRequest.class); //The toString() portion here is probably wrong.
             LoginResult loginResult = userService.login(user);
             response.status(200);
             return new Gson().toJson(loginResult);
@@ -111,7 +111,7 @@ public class Server {
 
     public Object listGames(Request request, Response response) throws DataAccessException {
         try {
-            var auth = request.headers("authorization");
+            String auth = request.headers("authorization");
             ListGamesResult listGamesResult = gameService.listGames(new ListGamesRequest(auth));
             response.status(200);
             return new Gson().toJson(listGamesResult);
@@ -127,9 +127,9 @@ public class Server {
 
     public Object createGame(Request request, Response response) {
         try {
-            var gameName = new Gson().fromJson(request.body(), GameData.class);
-            var auth = request.headers("authorization");
-            var game = new CreateGameRequest(auth, gameName.gameName());
+            GameData gameName = new Gson().fromJson(request.body(), GameData.class);
+            String auth = request.headers("authorization");
+            CreateGameRequest game = new CreateGameRequest(auth, gameName.gameName());
             CreateGameResult createGameResult = gameService.createGame(game);
             response.status(200);
             return new Gson().toJson(createGameResult);
@@ -148,8 +148,8 @@ public class Server {
 
     public Object joinGame(Request request, Response response) {
         try {
-            var auth = request.headers("authorization");
-            var game = new Gson().fromJson(request.body(), JoinGameRequest.class);
+            String auth = request.headers("authorization");
+            JoinGameRequest game = new Gson().fromJson(request.body(), JoinGameRequest.class);
             game = new JoinGameRequest(auth, game.playerColor(), game.gameID());
             JoinGameResult joinGameResult = gameService.joinGame(game);
             response.status(200);
