@@ -20,6 +20,7 @@ public class UserService {
         this.auths = auths;
     }
 
+    //generates an authorization token
     public String generateToken() {
         return UUID.randomUUID().toString();
     }
