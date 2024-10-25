@@ -4,10 +4,13 @@ import model.AuthData;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.UUID;
 
 public class MemoryAuthDAO implements AuthDAO {
     private Collection<AuthData> auths = new ArrayList<>();
+
+    public int authsSize() {
+        return auths.size();
+    }
 
     @Override
     public void createAuth(AuthData auth) throws DataAccessException {
@@ -16,9 +19,11 @@ public class MemoryAuthDAO implements AuthDAO {
 
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
-        if (auths == null){return null;}
+        if (auths == null) {
+            return null;
+        }
         for (AuthData auth : auths) {
-            if (auth.authToken() == authToken) {
+            if (auth.authToken().equals(authToken)) {
                 return auth;
             }
         }
@@ -33,8 +38,6 @@ public class MemoryAuthDAO implements AuthDAO {
 
     @Override
     public void clear() throws DataAccessException {
-        if (auths != null) {
-            auths.clear();
-        }
+        auths.clear();
     }
 }

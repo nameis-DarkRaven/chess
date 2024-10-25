@@ -8,10 +8,9 @@ import java.util.Collection;
 
 public class MemoryGameDAO implements GameDAO {
     private Collection<GameData> gameData = new ArrayList<>();
-    private ArrayList<Integer> ids = new ArrayList<>();
 
     private int createGameID() {
-        return ids.get(-1) + 1;
+        return gameData.size() + 1;
     }
 
     @Override
@@ -23,13 +22,15 @@ public class MemoryGameDAO implements GameDAO {
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
-        if (gameData == null){return null;}
+        if (gameData == null) {
+            return null;
+        }
         for (GameData game : gameData) {
             if (game.gameID() == gameID) {
                 return game;
             }
         }
-        throw new DataAccessException("Game does not exist.");
+        return null;
     }
 
     @Override
@@ -39,19 +40,19 @@ public class MemoryGameDAO implements GameDAO {
 
     @Override
     public void updateGame(int gameID, GameData game) throws DataAccessException {
-        if (gameData != null){
-        gameData.remove(game);
-        gameData.add(new GameData(gameID, game.whiteUsername(), game.blackUsername(), game.gameName(), game.game()));
-    } else{throw new DataAccessException("Game does not exist.");}
+        if (gameData != null) {
+            GameData oldGame = getGame(gameID);
+            gameData.remove(oldGame);
+            gameData.add(game);
+        } else {
+            throw new DataAccessException("Game does not exist.");
+        }
     }
 
     @Override
     public void clear() throws DataAccessException {
         if (gameData != null) {
             gameData.clear();
-        }
-        if (ids != null) {
-            ids.clear();
         }
     }
 
