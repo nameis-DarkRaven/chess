@@ -26,12 +26,18 @@ public class ChessMove {
     }
 
 
-    public ChessPiece.PieceType getPromotionPiece() { return type; }
+    public ChessPiece.PieceType getPromotionPiece() {
+        return type;
+    }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ChessMove chessMove = (ChessMove) o;
         return Objects.equals(start, chessMove.start) && Objects.equals(end, chessMove.end) && type == chessMove.type;
     }

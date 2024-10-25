@@ -98,7 +98,7 @@ public class ChessGame {
         else{possibleMoves = getPossibleMoves(TeamColor.WHITE);}
         for (ChessMove move : possibleMoves) {
             ChessPiece piece = board.getPiece(move.getEndPosition());
-            if (board.getPieces()[8 - move.getEndPosition().getRow()][move.getEndPosition().getColumn() - 1] != null && piece.getPieceType() == ChessPiece.PieceType.KING) {
+            if (board.getPiece(move.getEndPosition()) != null && piece.getPieceType() == ChessPiece.PieceType.KING) {
                 if(piece.getTeamColor() == teamColor){return true;}
             }
         }
@@ -168,8 +168,8 @@ public class ChessGame {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {return true;}
+        if (o == null || getClass() != o.getClass()) {return false;}
         ChessGame chessGame = (ChessGame) o;
         return teamTurn == chessGame.teamTurn && Objects.equals(board, chessGame.board);
     }

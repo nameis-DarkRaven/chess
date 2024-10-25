@@ -9,8 +9,12 @@ public class ChessPosition {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ChessPosition that = (ChessPosition) o;
         return row == that.row && column == that.column;
     }
@@ -34,7 +38,9 @@ public class ChessPosition {
     }
 
 
-    public int getRow() {return row;}
+    public int getRow() {
+        return row;
+    }
 
 
     public int getColumn() {

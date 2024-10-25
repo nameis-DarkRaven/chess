@@ -217,7 +217,7 @@ public class ServiceTests {
     }
 
     @Test
-    public void UnauthorizedListGames() {
+    public void unauthorizedListGames() {
         try {
             String authToken1 = userService.generateToken();
             createGameRequest = new CreateGameRequest(authToken1, "Game1");
