@@ -42,13 +42,11 @@ public class ServiceTests {
     }
 
     @BeforeEach
-    public void setup() {
-        try {
-            users.clear();
-            auths.clear();
-            games.clear();
-        } catch (DataAccessException _) {
-        }
+    public void setup() throws DataAccessException {
+        users.clear();
+        auths.clear();
+        games.clear();
+
     }
 
 
@@ -298,7 +296,7 @@ public class ServiceTests {
             ListGamesResult correctResult = new ListGamesResult(games);
             assertEquals(correctResult, listGamesResult);
 
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             assertNull(e);
         }
     }
@@ -321,9 +319,9 @@ public class ServiceTests {
 
             assertNull(listGamesResult);
 
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             assertNull(e);
-        } catch (UnauthorizedException e){
+        } catch (UnauthorizedException e) {
             assertEquals("Error: Unauthorized access.", e.getMessage());
         }
     }
@@ -347,9 +345,9 @@ public class ServiceTests {
 
             assertNull(listGamesResult);
 
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             assertNull(e);
-        } catch (AlreadyTakenException e){
+        } catch (AlreadyTakenException e) {
             assertEquals("Error: Another player has already taken that spot.", e.getMessage());
         }
     }
@@ -371,9 +369,9 @@ public class ServiceTests {
 
             assertNull(listGamesResult);
 
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             assertNull(e);
-        } catch (BadRequestException e){
+        } catch (BadRequestException e) {
             assertEquals("Error: Invalid request.", e.getMessage());
         }
     }
