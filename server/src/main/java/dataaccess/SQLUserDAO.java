@@ -23,7 +23,8 @@ public class SQLUserDAO implements UserDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("Unable to configure database: %s", e.getMessage()));
+            throw new DataAccessException(String.format
+                    ("Unable to configure database: %s", e.getMessage()));
         }
     }
 
@@ -59,15 +60,15 @@ public class SQLUserDAO implements UserDAO {
                 return 0;
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("Unable to update database: %s, %s", statement, e.getMessage()));
+            throw new DataAccessException(String.format
+                    ("Unable to update database: %s, %s", statement, e.getMessage()));
         }
     }
 
 
     private UserData readUser(ResultSet resultSet)throws SQLException {
         var json = resultSet.getString("json");
-        var user = new Gson().fromJson(json, UserData.class);
-        return user;
+        return new Gson().fromJson(json, UserData.class);
     }
 
 
@@ -84,7 +85,6 @@ public class SQLUserDAO implements UserDAO {
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT username, json FROM users WHERE username=?";
             try (var pStatement = conn.prepareStatement(statement)) {
-//                pStatement.setString(1, id);
                 try (var resultSet = pStatement.executeQuery()) {
                     if (resultSet.next()) {
                         return readUser(resultSet);
@@ -92,7 +92,8 @@ public class SQLUserDAO implements UserDAO {
                 }
             }
         } catch (Exception e) {
-            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
+            throw new DataAccessException(String.format
+                    ("Unable to read data: %s", e.getMessage()));
         }
         return null;
     }
