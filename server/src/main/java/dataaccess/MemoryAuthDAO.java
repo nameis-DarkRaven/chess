@@ -8,13 +8,10 @@ import java.util.Collection;
 public class MemoryAuthDAO implements AuthDAO {
     private Collection<AuthData> auths = new ArrayList<>();
 
-    public int authsSize() {
-        return auths.size();
-    }
-
     @Override
-    public void createAuth(AuthData auth) throws DataAccessException {
+    public AuthData createAuth(AuthData auth) throws DataAccessException {
         auths.add(auth);
+        return auth;
     }
 
     @Override
