@@ -9,8 +9,9 @@ public class MemoryUserDAO implements UserDAO {
     private Collection<UserData> users = new ArrayList<>();
 
     @Override
-    public void createUser(UserData user) throws DataAccessException {
+    public UserData createUser(UserData user) throws DataAccessException {
         users.add(user);
+        return user;
     }
 
     @Override
