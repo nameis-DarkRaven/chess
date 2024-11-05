@@ -13,10 +13,6 @@ import static java.sql.Types.NULL;
 
 public class SQLAuthDAO implements AuthDAO {
 
-    public SQLAuthDAO() throws DataAccessException {
-        configureDatabase();
-    }
-
     public void configureDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
         try (var conn = DatabaseManager.getConnection()) {
@@ -33,11 +29,10 @@ public class SQLAuthDAO implements AuthDAO {
 
     private final String[] createStatements = {
             """
-            CREATE TABLE IF NOT EXISTS  users (
+            CREATE TABLE IF NOT EXISTS  auths (
               `user` varchar(256) NOT NULL,
               `authToken` varchar(256) NOT NULL,
-              `json` TEXT DEFAULT NULL,
-              PRIMARY KEY (`authToken`),
+              PRIMARY KEY (`authToken`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };
@@ -72,20 +67,27 @@ public class SQLAuthDAO implements AuthDAO {
         return new Gson().fromJson(json, AuthData.class);
     }
 
+    //Will not be used but exists for the purpose of testing my service methods with MemoryAuthDAO.java.
+    @Override
+    public int authsSize() throws DataAccessException {
+        return 0;
+    }
+
     @Override
     public AuthData createAuth(AuthData auth) throws DataAccessException {
-        var statement = "INSERT INTO auths (user, password, json) VALUES (?, ?, ?)";
-        var json = new Gson().toJson(auth);
-        executeUpdate(statement, auth.username(), auth.authToken(), json);
+        configureDatabase();
+        var statement = "INSERT INTO auths (user, password) VALUES (?, ?)";
+        executeUpdate(statement, auth.username(), auth.authToken());
         return new AuthData(auth.username(), auth.authToken());
     }
 
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
+        configureDatabase();
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT username, json FROM users WHERE username=?";
+            var statement = "SELECT * FROM auths WHERE authToken=?";
             try (var pStatement = conn.prepareStatement(statement)) {
-//                pStatement.setString(1, id);
+                pStatement.setString(1, authToken);
                 try (var resultSet = pStatement.executeQuery()) {
                     if (resultSet.next()) {
                         return readAuth(resultSet);
@@ -100,12 +102,14 @@ public class SQLAuthDAO implements AuthDAO {
 
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
+        configureDatabase();
         var statement = "DELETE FROM auths WHERE authToken=?";
         executeUpdate(statement, authToken);
     }
 
     @Override
     public void clear() throws DataAccessException {
+        configureDatabase();
         var statement = "TRUNCATE auths";
         executeUpdate(statement);
     }
