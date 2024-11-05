@@ -64,7 +64,8 @@ public class UserService {
     public void logout(LogoutRequest request) throws DataAccessException {
         try {
             AuthData auth = auths.getAuth(request.authToken());
-            auths.deleteAuth(auth.authToken());
+            if(auth != null){
+            auths.deleteAuth(auth.authToken());}
         } catch (DataAccessException e) {
             throw new UnauthorizedException("Error: Invalid logout.");
         }

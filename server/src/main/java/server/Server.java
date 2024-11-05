@@ -9,9 +9,10 @@ import spark.*;
 
 public class Server {
 
-    private final UserDAO users = new MemoryUserDAO();
-    private final AuthDAO auths = new MemoryAuthDAO();
-    private final GameDAO games = new MemoryGameDAO();
+    private final UserDAO users = new SQLUserDAO();
+    private final AuthDAO auths = new SQLAuthDAO();
+    private final GameDAO games = new SQLGameDAO();
+
     private final UserService userService = new UserService(users, auths);
     private final GameService gameService = new GameService(auths, games, users);
 

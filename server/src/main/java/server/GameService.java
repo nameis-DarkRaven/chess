@@ -11,6 +11,7 @@ import results.CreateGameResult;
 import results.JoinGameResult;
 import results.ListGamesResult;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class GameService {
@@ -27,7 +28,10 @@ public class GameService {
     public ListGamesResult listGames(ListGamesRequest request) throws DataAccessException {
         try {
             AuthData auth = auths.getAuth(request.authToken());
-            Collection<GameData> gamesList = games.listGames(auth.authToken());
+            Collection<GameData> gamesList = new ArrayList<>();
+            if (auth != null) {
+                gamesList = games.listGames(auth.authToken());
+            }
             return new ListGamesResult(gamesList);
         } catch (DataAccessException e) {
             throw new UnauthorizedException("Error: Unauthorized access.");
