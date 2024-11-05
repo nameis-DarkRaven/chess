@@ -2,6 +2,7 @@ package dataaccess;
 
 import com.google.gson.Gson;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 
@@ -10,8 +11,12 @@ import static java.sql.Types.NULL;
 
 public class SQLUserDAO implements UserDAO {
 
-    public SQLUserDAO() throws DataAccessException {
-        configureDatabase();
+    private String hashPass(String pass){
+        return BCrypt.hashpw(pass, BCrypt.gensalt());
+    }
+
+    private String checkPass(String hashedPass){
+        return null;
     }
 
     public void configureDatabase() throws DataAccessException {
@@ -34,8 +39,7 @@ public class SQLUserDAO implements UserDAO {
               `user` varchar(256) NOT NULL,
               `password` varchar(256) NOT NULL,
               `email` varchar(256) NOT NULL,
-              `json` TEXT DEFAULT NULL,
-              PRIMARY KEY (`user`),
+              PRIMARY KEY (`user`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };
@@ -66,7 +70,7 @@ public class SQLUserDAO implements UserDAO {
     }
 
 
-    private UserData readUser(ResultSet resultSet)throws SQLException {
+    private UserData readUser(ResultSet resultSet) throws SQLException {
         var json = resultSet.getString("json");
         return new Gson().fromJson(json, UserData.class);
     }
@@ -74,24 +78,35 @@ public class SQLUserDAO implements UserDAO {
 
     @Override
     public UserData createUser(UserData user) throws DataAccessException {
-        var statement = "INSERT INTO users (user, password, email, json) VALUES (?, ?, ?, ?)";
-        var json = new Gson().toJson(user);
-        executeUpdate(statement, user.username(), user.password(), user.email(), json);
-        return new UserData(user.username(), user.password(), user.email());
+        configureDatabase();
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "INSERT INTO users (user, password, email, json) VALUES (?, ?, ?, ?)";
+            try (var pStatement = conn.prepareStatement(statement)) {
+                pStatement.setString(1, user.username());
+                pStatement.setString(2, hashPass(user.password()));
+                pStatement.setString(3, user.email());
+                return new UserData(user.username(), user.password(), user.email());
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format
+                    ("Unable to read data: %s", e.getMessage()));
+        }
     }
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
+        configureDatabase();
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT username, json FROM users WHERE username=?";
+            var statement = "SELECT * FROM users WHERE username=?";
             try (var pStatement = conn.prepareStatement(statement)) {
+                pStatement.setString(1, username);
                 try (var resultSet = pStatement.executeQuery()) {
                     if (resultSet.next()) {
                         return readUser(resultSet);
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             throw new DataAccessException(String.format
                     ("Unable to read data: %s", e.getMessage()));
         }
@@ -100,6 +115,7 @@ public class SQLUserDAO implements UserDAO {
 
     @Override
     public void clear() throws DataAccessException {
+        configureDatabase();
         var statement = "TRUNCATE users";
         executeUpdate(statement);
     }
