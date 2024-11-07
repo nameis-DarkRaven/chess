@@ -1,8 +1,6 @@
 package dataaccess;
 
-import com.google.gson.Gson;
 import model.UserData;
-import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 
@@ -10,14 +8,6 @@ import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
 public class SQLUserDAO implements UserDAO {
-
-    private String hashPass(String pass){
-        return BCrypt.hashpw(pass, BCrypt.gensalt());
-    }
-
-    private String checkPass(String hashedPass){
-        return null;
-    }
 
     public void configureDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
@@ -36,10 +26,10 @@ public class SQLUserDAO implements UserDAO {
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS  users (
-              `user` varchar(256) NOT NULL,
+              `username` varchar(256) NOT NULL,
               `password` varchar(256) NOT NULL,
               `email` varchar(256) NOT NULL,
-              PRIMARY KEY (`user`)
+              PRIMARY KEY (`username`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };
@@ -69,22 +59,16 @@ public class SQLUserDAO implements UserDAO {
         }
     }
 
-
-    private UserData readUser(ResultSet resultSet) throws SQLException {
-        var json = resultSet.getString("json");
-        return new Gson().fromJson(json, UserData.class);
-    }
-
-
     @Override
     public UserData createUser(UserData user) throws DataAccessException {
         configureDatabase();
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "INSERT INTO users (user, password, email, json) VALUES (?, ?, ?, ?)";
+            var statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
             try (var pStatement = conn.prepareStatement(statement)) {
                 pStatement.setString(1, user.username());
-                pStatement.setString(2, hashPass(user.password()));
+                pStatement.setString(2, user.password());
                 pStatement.setString(3, user.email());
+                pStatement.executeUpdate();
                 return new UserData(user.username(), user.password(), user.email());
             }
         } catch (SQLException e) {
@@ -102,7 +86,9 @@ public class SQLUserDAO implements UserDAO {
                 pStatement.setString(1, username);
                 try (var resultSet = pStatement.executeQuery()) {
                     if (resultSet.next()) {
-                        return readUser(resultSet);
+                        return new UserData(resultSet.getString("username"),
+                                resultSet.getString("password"),
+                                resultSet.getString("email"));
                     }
                 }
             }
