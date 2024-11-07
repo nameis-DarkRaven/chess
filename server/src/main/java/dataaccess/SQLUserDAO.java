@@ -6,7 +6,7 @@ import java.sql.*;
 
 public class SQLUserDAO implements UserDAO {
 
-    public void configureDatabase() throws DataAccessException {
+    private void configureDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
         try (var conn = DatabaseManager.getConnection()) {
             for (var statement : createStatements) {
