@@ -11,7 +11,6 @@ import results.CreateGameResult;
 import results.JoinGameResult;
 import results.ListGamesResult;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 public class GameService {
@@ -25,22 +24,29 @@ public class GameService {
         this.users = users;
     }
 
-    public ListGamesResult listGames(ListGamesRequest request) throws DataAccessException {
+    public ListGamesResult listGames(ListGamesRequest request) throws DataAccessException, UnauthorizedException {
         try {
             AuthData auth = auths.getAuth(request.authToken());
-            Collection<GameData> gamesList = new ArrayList<>();
-            if (auth != null) {
-                gamesList = games.listGames(auth.authToken());
+            if (auth == null) {
+                throw new UnauthorizedException("Error: Unauthorized access.");
             }
+            Collection<GameData> gamesList = games.listGames(auth.authToken());
             return new ListGamesResult(gamesList);
         } catch (DataAccessException e) {
             throw new UnauthorizedException("Error: Unauthorized access.");
         }
     }
 
-    public CreateGameResult createGame(CreateGameRequest request) throws DataAccessException {
+    public CreateGameResult createGame(CreateGameRequest request)
+            throws DataAccessException, BadRequestException, UnauthorizedException {
         try {
+            if (request.gameName() == null) {
+                throw new BadRequestException("Error: Invalid game name.");
+            }
             AuthData auth = auths.getAuth(request.authToken());
+            if (auth == null) {
+                throw new UnauthorizedException("Error: Unauthorized access.");
+            }
             int gameID = games.createGame(request.gameName());
             return new CreateGameResult(gameID);
         } catch (DataAccessException e) {
@@ -48,23 +54,29 @@ public class GameService {
         }
     }
 
-    public JoinGameResult joinGame(JoinGameRequest request) throws DataAccessException {
+    public JoinGameResult joinGame(JoinGameRequest request)
+            throws DataAccessException, UnauthorizedException, BadRequestException, AlreadyTakenException {
         try {
             if (games.getGame(request.gameID()) == null) {
                 throw new BadRequestException("Error: Invalid request.");
             }
             AuthData auth = auths.getAuth(request.authToken());
+            if (auth == null) {
+                throw new UnauthorizedException("Error: Unauthorized access.");
+            }
             UserData user = users.getUser(auth.username());
             GameData game = games.getGame(request.gameID());
             if (request.playerColor() == ChessGame.TeamColor.BLACK) {
                 if (game.blackUsername() == null) {
-                    games.updateGame(game.gameID(), new GameData(game.gameID(), game.whiteUsername(), user.username(), game.gameName(), game.game()));
+                    games.updateGame(game.gameID(), new GameData(game.gameID(), game.whiteUsername(),
+                            user.username(), game.gameName(), game.game()));
                 } else {
                     throw new AlreadyTakenException("Error: Another player has already taken that spot.");
                 }
             } else if (request.playerColor() == ChessGame.TeamColor.WHITE) {
                 if (game.whiteUsername() == null) {
-                    games.updateGame(game.gameID(), new GameData(game.gameID(), user.username(), game.blackUsername(), game.gameName(), game.game()));
+                    games.updateGame(game.gameID(), new GameData(game.gameID(), user.username(),
+                            game.blackUsername(), game.gameName(), game.game()));
                 } else {
                     throw new AlreadyTakenException("Error: Another player has already taken that spot.");
                 }
