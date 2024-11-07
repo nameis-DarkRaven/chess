@@ -44,7 +44,8 @@ public class SQLAuthDAO implements AuthDAO {
                         case String p -> ps.setString(i + 1, p);
                         case Integer p -> ps.setInt(i + 1, p);
                         case UserData p -> ps.setString(i + 1, p.toString());
-                        default -> ps.setNull(i + 1, NULL);
+                        case null -> ps.setNull(i + 1, NULL);
+                        default -> {}
                     }
                 }
                 ps.executeUpdate();
@@ -55,6 +56,7 @@ public class SQLAuthDAO implements AuthDAO {
         }
     }
 
+    //used for testing
     @Override
     public int authsSize() throws DataAccessException {
         configureDatabase();
