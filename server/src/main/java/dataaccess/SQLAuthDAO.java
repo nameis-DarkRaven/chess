@@ -35,24 +35,19 @@ public class SQLAuthDAO implements AuthDAO {
             """
     };
 
-    private int executeUpdate(String statement, Object... objects) throws DataAccessException {
+    private void executeUpdate(String statement, Object... objects) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
                 for (var i = 0; i < objects.length; i++) {
                     var object = objects[i];
-                    if (object instanceof String p) ps.setString(i + 1, p);
-                    else if (object instanceof Integer p) ps.setInt(i + 1, p);
-                    else if (object instanceof UserData p) ps.setString(i + 1, p.toString());
-                    else if (object == null) ps.setNull(i + 1, NULL);
+                    switch (object) {
+                        case String p -> ps.setString(i + 1, p);
+                        case Integer p -> ps.setInt(i + 1, p);
+                        case UserData p -> ps.setString(i + 1, p.toString());
+                        default -> ps.setNull(i + 1, NULL);
+                    }
                 }
                 ps.executeUpdate();
-
-                var rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-
-                return 0;
             }
         } catch (SQLException e) {
             throw new DataAccessException(String.format
