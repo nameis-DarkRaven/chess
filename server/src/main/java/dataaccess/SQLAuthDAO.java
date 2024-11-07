@@ -1,12 +1,10 @@
 package dataaccess;
 
-import com.google.gson.Gson;
-import com.mysql.cj.exceptions.DataReadException;
 import model.AuthData;
 import model.UserData;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
@@ -62,21 +60,33 @@ public class SQLAuthDAO implements AuthDAO {
         }
     }
 
-    private AuthData readAuth(ResultSet resultSet) throws SQLException{
-        var json = resultSet.getString("json");
-        return new Gson().fromJson(json, AuthData.class);
-    }
-
-    //Will not be used but exists for the purpose of testing my service methods with MemoryAuthDAO.java.
     @Override
     public int authsSize() throws DataAccessException {
-        return 0;
+        configureDatabase();
+        ArrayList<AuthData> auths = new ArrayList<>();
+        var statement = "Select * from auths";
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement(statement)) {
+                try (var rs = ps.executeQuery()) {
+                    String user, auth;
+                    while (rs.next()) {
+                        user = rs.getString("user");
+                        auth = rs.getString("authToken");
+                        auths.add(new AuthData(user, auth));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format
+                    ("Unable to read data: %s", e.getMessage()));
+        }
+        return auths.size();
     }
 
     @Override
     public AuthData createAuth(AuthData auth) throws DataAccessException {
         configureDatabase();
-        var statement = "INSERT INTO auths (user, password) VALUES (?, ?)";
+        var statement = "INSERT INTO auths (user, authToken) VALUES (?, ?)";
         executeUpdate(statement, auth.username(), auth.authToken());
         return new AuthData(auth.username(), auth.authToken());
     }
@@ -90,11 +100,12 @@ public class SQLAuthDAO implements AuthDAO {
                 pStatement.setString(1, authToken);
                 try (var resultSet = pStatement.executeQuery()) {
                     if (resultSet.next()) {
-                        return readAuth(resultSet);
+                        return new AuthData(resultSet.getString("user"),
+                                resultSet.getString("authToken"));
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
         }
         return null;

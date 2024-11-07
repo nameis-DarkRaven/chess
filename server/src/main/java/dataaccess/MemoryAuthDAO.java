@@ -29,7 +29,7 @@ public class MemoryAuthDAO implements AuthDAO {
                 return auth;
             }
         }
-        throw new DataAccessException("Invalid authorization.");
+        return null;
     }
 
     @Override
