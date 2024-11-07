@@ -5,6 +5,7 @@ import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
 import model.UserData;
 import model.AuthData;
+import org.mindrot.jbcrypt.BCrypt;
 import requests.*;
 import results.LoginResult;
 import results.RegisterResult;
@@ -20,17 +21,26 @@ public class UserService {
         this.auths = auths;
     }
 
+    public String hashPass(String pass){
+        return BCrypt.hashpw(pass, BCrypt.gensalt());
+    }
+
+    public boolean checkPass(String storedPass, String pass){
+        return BCrypt.checkpw(pass, storedPass);
+    }
+
     //generates an authorization token
     public String generateToken() {
         return UUID.randomUUID().toString();
     }
 
-    public RegisterResult register(RegisterRequest request) throws DataAccessException, BadRequestException, AlreadyTakenException {
+    public RegisterResult register(RegisterRequest request)
+            throws DataAccessException, BadRequestException, AlreadyTakenException {
         try {
             if (request.username() == null || request.password() == null) {
                 throw new BadRequestException("Error: Invalid username or password.");
             }
-            UserData user = new UserData(request.username(), request.password(), request.email());
+            UserData user = new UserData(request.username(), hashPass(request.password()), request.email());
             if (users.getUser(user.username()) != null) {
                 throw new AlreadyTakenException("Error: Username already taken.");
             }
@@ -44,12 +54,13 @@ public class UserService {
         }
     }
 
-    public LoginResult login(LoginRequest request) throws DataAccessException, BadRequestException, UnauthorizedException {
+    public LoginResult login(LoginRequest request) throws DataAccessException, UnauthorizedException {
         try {
             if (request.username() == null || request.password() == null) {
-                throw new BadRequestException("Error: Invalid username or password.");
+                throw new UnauthorizedException("Error: Invalid username or password.");
             }
-            if(users.getUser(request.username()) == null || !request.password().equals(users.getUser(request.username()).password()) ){
+            if(users.getUser(request.username()) == null ||
+                    !checkPass(users.getUser(request.username()).password(), request.password())){
                 throw new UnauthorizedException("Error: Incorrect username or password.");
             }
             String authToken = generateToken();
@@ -61,11 +72,14 @@ public class UserService {
         }
     }
 
-    public void logout(LogoutRequest request) throws DataAccessException {
+    public void logout(LogoutRequest request) throws DataAccessException, UnauthorizedException {
         try {
             AuthData auth = auths.getAuth(request.authToken());
             if(auth != null){
             auths.deleteAuth(auth.authToken());}
+            else{
+                throw new UnauthorizedException("Error: Invalid logout.");
+            }
         } catch (DataAccessException e) {
             throw new UnauthorizedException("Error: Invalid logout.");
         }

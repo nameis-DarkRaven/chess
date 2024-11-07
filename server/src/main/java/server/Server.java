@@ -43,22 +43,18 @@ public class Server {
         Spark.awaitStop();
     }
 
+    //potentially should authenticate user before clear
     public Object clear(Request request, Response response) throws DataAccessException {
-        try {
-            auths.clear();
-            users.clear();
-            games.clear();
-            response.status(200);
-            return "";
-        } catch (UnauthorizedException e) {
-            response.status(401);
-            return new Gson().toJson(new ErrorMessage("Error: Unauthorized access."));
-        }
+        auths.clear();
+        users.clear();
+        games.clear();
+        response.status(200);
+        return "";
     }
 
     public Object register(Request request, Response response) {
         try {
-            RegisterRequest user = new Gson().fromJson(request.body(), RegisterRequest.class); //The toString() portion here is probably wrong.
+            RegisterRequest user = new Gson().fromJson(request.body(), RegisterRequest.class);
             RegisterResult registerResult = userService.register(user);
             response.status(200);
             return new Gson().toJson(registerResult);
@@ -152,7 +148,7 @@ public class Server {
             String auth = request.headers("authorization");
             JoinGameRequest game = new Gson().fromJson(request.body(), JoinGameRequest.class);
             game = new JoinGameRequest(auth, game.playerColor(), game.gameID());
-            JoinGameResult joinGameResult = gameService.joinGame(game);
+            gameService.joinGame(game);
             response.status(200);
             return "";
 
@@ -174,7 +170,3 @@ public class Server {
     }
 
 }
-
-
-
-
