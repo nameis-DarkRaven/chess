@@ -3,6 +3,7 @@ package dataaccess;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
+import model.UserData;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,7 +36,7 @@ public class SQLGameDAO implements GameDAO {
               `whiteUsername` varchar(256) DEFAULT NULL,
               `blackUsername` varchar(256) DEFAULT NULL,
               `gameName` varchar(256) NOT NULL,
-              `game` TEXT NOT NULL,
+              `game` LONGTEXT NOT NULL,
               PRIMARY KEY (`gameID`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
@@ -64,22 +65,20 @@ public class SQLGameDAO implements GameDAO {
         }
     }
 
-    private GameData readGame(ResultSet resultSet) throws SQLException {
-        var json = resultSet.getString("json");
-        return new Gson().fromJson(json, GameData.class);
-    }
 
     @Override
     public int createGame(String gameName) throws DataAccessException {
         configureDatabase();
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "INSERT INTO games (gameID, whiteUsername, blackUsername, " +
-                    "gameName, game) VALUES (?, ?, ?, ?, ?)";
-            try (var pStatement = conn.prepareStatement(statement)) {
-                pStatement.setString(4, gameName);
+            var statement = "INSERT INTO games (gameName, game) VALUES (?, ?)";
+            try (var pStatement = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
+                pStatement.setString(1, gameName);
                 var json = new Gson().toJson(new ChessGame());
-                pStatement.setString(5, json);
-                return executeUpdate(statement);
+                pStatement.setString(2, json);
+                pStatement.executeUpdate();
+                ResultSet rs = pStatement.getGeneratedKeys();
+                rs.next();
+                return rs.getInt(1);
             }
         } catch (SQLException e) {
             throw new DataAccessException(String.format
@@ -96,7 +95,12 @@ public class SQLGameDAO implements GameDAO {
                 pStatement.setInt(1, gameID);
                 try (var resultSet = pStatement.executeQuery()) {
                     if (resultSet.next()) {
-                        return readGame(resultSet);
+                        var json = resultSet.getString("game");
+                        return new GameData(resultSet.getInt("gameID"),
+                                resultSet.getString("whiteUsername"),
+                                resultSet.getString("blackUsername"),
+                                resultSet.getString("gameName"),
+                                new Gson().fromJson(json, ChessGame.class));
                     }
                 }
             }
@@ -115,8 +119,16 @@ public class SQLGameDAO implements GameDAO {
             var statement = "SELECT * FROM games";
             try (var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
+                    int gameID;
+                    String blackUsername, whiteUsername, gameName;
+                    ChessGame game;
                     while (rs.next()) {
-                        gameList.add(readGame(rs));
+                        gameID = rs.getInt("gameID");
+                        blackUsername = rs.getString("blackUsername");
+                        whiteUsername = rs.getString("whiteUsername");
+                        gameName = rs.getString("gameName");
+                        game = new Gson().fromJson(rs.getString("game"), ChessGame.class);
+                        gameList.add(new GameData(gameID, whiteUsername, blackUsername, gameName, game));
                     }
                 }
             }
@@ -131,13 +143,14 @@ public class SQLGameDAO implements GameDAO {
     public void updateGame(int gameID, GameData game) throws DataAccessException {
         configureDatabase();
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "Update game Set whiteUsername = ?, blackUsername = ?, game=? WHERE gameID=?";
+            var statement = "Update games Set whiteUsername = ?, blackUsername = ?, game = ? WHERE gameID=?";
             try (var pStatement = conn.prepareStatement(statement)) {
                 pStatement.setString(1, game.whiteUsername());
                 pStatement.setString(2, game.blackUsername());
                 var json = new Gson().toJson(game.game());
                 pStatement.setString(3, json);
                 pStatement.setInt(4, gameID);
+                pStatement.executeUpdate();
             }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
