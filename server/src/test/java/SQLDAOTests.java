@@ -10,7 +10,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import server.GameService;
 import server.UserService;
 
 import java.util.ArrayList;
@@ -22,8 +21,6 @@ public class SQLDAOTests {
     private static GameDAO games;
 
     private static UserService userService;
-    private static GameService gameService;
-
 
     @BeforeAll
     public static void init() {
@@ -31,7 +28,6 @@ public class SQLDAOTests {
         auths = new SQLAuthDAO();
         games = new SQLGameDAO();
         userService = new UserService(users, auths);
-        gameService = new GameService(auths, games, users);
     }
 
     @AfterEach
@@ -99,7 +95,7 @@ public class SQLDAOTests {
     }
 
     @Test
-    public void NullDeleteAuthTest() throws DataAccessException{
+    public void nullDeleteAuthTest() throws DataAccessException{
         String authToken = userService.generateToken();
         auths.deleteAuth(authToken);
         assertEquals(0,auths.authsSize());

@@ -1,7 +1,6 @@
 package dataaccess;
 
 import model.AuthData;
-import model.UserData;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -14,8 +13,8 @@ public class SQLAuthDAO implements AuthDAO {
     private void configureDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
         try (var conn = DatabaseManager.getConnection()) {
-            for (var statement : createStatements) {
-                try (var pStatement = conn.prepareStatement(statement)) {
+            for (var s : createStatements) {
+                try (var pStatement = conn.prepareStatement(s)) {
                     pStatement.executeUpdate();
                 }
             }
@@ -40,13 +39,10 @@ public class SQLAuthDAO implements AuthDAO {
             try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
                 for (var i = 0; i < objects.length; i++) {
                     var object = objects[i];
-                    switch (object) {
-                        case String p -> ps.setString(i + 1, p);
-                        case Integer p -> ps.setInt(i + 1, p);
-                        case UserData p -> ps.setString(i + 1, p.toString());
-                        case null -> ps.setNull(i + 1, NULL);
-                        default -> {}
-                    }
+                    if (object instanceof String p){ ps.setString(i + 1, p);}
+                    else if (object instanceof Integer p) {ps.setInt(i + 1, p);}
+                    else if (object instanceof AuthData p) {ps.setString(i + 1, p.toString());}
+                    else if (object == null) {ps.setNull(i + 1, NULL);}
                 }
                 ps.executeUpdate();
             }

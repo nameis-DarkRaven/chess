@@ -42,7 +42,7 @@ public class ServiceTests {
     }
 
     @AfterEach
-    public void fullClear() throws DataAccessException {
+    public void clear() throws DataAccessException {
         users.clear();
         auths.clear();
         games.clear();
