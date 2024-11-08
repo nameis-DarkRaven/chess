@@ -1,10 +1,11 @@
+package dataaccess;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
 import chess.InvalidMoveException;
-import dataaccess.*;
 import model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
