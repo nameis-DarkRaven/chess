@@ -42,13 +42,11 @@ public class ServiceTests {
     }
 
     @AfterEach
-    public void clear() throws DataAccessException {
+    public void fullClear() throws DataAccessException {
         users.clear();
         auths.clear();
         games.clear();
-
     }
-
 
     @Test
     public void goodRegistration() throws DataAccessException, BadRequestException, AlreadyTakenException {

@@ -92,15 +92,15 @@ public class SQLGameDAO implements GameDAO {
             var statement = "SELECT * FROM auths";
             try (var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
-                    if (!rs.getString("authToken").equals(authToken)) {
-                        throw new DataAccessException("Error: Unauthorized access.");
-                    }
-                    do {
-                        if (!rs.getString("authToken").equals(authToken)) {
-                            throw new DataAccessException("Error: Unauthorized access.");
+                    boolean unauthorized = true;
+                    while (rs.next()) {
+                        if (rs.getString("authToken").equals(authToken)) {
+                            unauthorized = false;
                         }
                     }
-                    while (rs.next());
+                    if(unauthorized){
+                        throw new DataAccessException("Error: Unauthorized access.");
+                    }
                 }
             }
             statement = "SELECT * FROM games";
@@ -130,6 +130,9 @@ public class SQLGameDAO implements GameDAO {
     @Override
     public void updateGame(int gameID, GameData game) throws DataAccessException {
         configureDatabase();
+        if (getGame(gameID) == null || gameID != game.gameID()) {
+            throw new DataAccessException("Error: Incorrect game ID or game.");
+        }
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "Update games Set whiteUsername = ?, blackUsername = ?, game = ? WHERE gameID=?";
             try (var pStatement = conn.prepareStatement(statement)) {
