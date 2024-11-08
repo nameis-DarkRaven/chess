@@ -10,7 +10,7 @@ import static java.sql.Types.NULL;
 
 public class SQLAuthDAO implements AuthDAO {
 
-    private void configureDatabase() throws DataAccessException {
+    private void configureDB() throws DataAccessException {
         DatabaseManager.createDatabase();
         try (var conn = DatabaseManager.getConnection()) {
             for (var s : createStatements) {
@@ -55,7 +55,7 @@ public class SQLAuthDAO implements AuthDAO {
     //used for testing
     @Override
     public int authsSize() throws DataAccessException {
-        configureDatabase();
+        configureDB();
         ArrayList<AuthData> auths = new ArrayList<>();
         var statement = "Select * from auths";
         try (var conn = DatabaseManager.getConnection()) {
@@ -78,7 +78,7 @@ public class SQLAuthDAO implements AuthDAO {
 
     @Override
     public AuthData createAuth(AuthData auth) throws DataAccessException {
-        configureDatabase();
+        configureDB();
         var statement = "INSERT INTO auths (user, authToken) VALUES (?, ?)";
         executeUpdate(statement, auth.username(), auth.authToken());
         return new AuthData(auth.username(), auth.authToken());
@@ -86,7 +86,7 @@ public class SQLAuthDAO implements AuthDAO {
 
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
-        configureDatabase();
+        configureDB();
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM auths WHERE authToken=?";
             try (var pStatement = conn.prepareStatement(statement)) {
@@ -106,14 +106,14 @@ public class SQLAuthDAO implements AuthDAO {
 
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
-        configureDatabase();
+        configureDB();
         var statement = "DELETE FROM auths WHERE authToken=?";
         executeUpdate(statement, authToken);
     }
 
     @Override
     public void clear() throws DataAccessException {
-        configureDatabase();
+        configureDB();
         var statement = "TRUNCATE auths";
         executeUpdate(statement);
     }

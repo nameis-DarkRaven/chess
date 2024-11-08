@@ -12,7 +12,7 @@ import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
 public class SQLGameDAO implements GameDAO {
 
-    private void configureDatabase() throws DataAccessException {
+    private void configDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
         try (var conn = DatabaseManager.getConnection()) {
             for (var statement : createStatements) {
@@ -41,7 +41,7 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public int createGame(String gameName) throws DataAccessException {
-        configureDatabase();
+        configDatabase();
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "INSERT INTO games (gameName, game) VALUES (?, ?)";
             try (var pStatement = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
@@ -61,7 +61,7 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
-        configureDatabase();
+        configDatabase();
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM games WHERE gameID=?";
             try (var pStatement = conn.prepareStatement(statement)) {
@@ -84,17 +84,31 @@ public class SQLGameDAO implements GameDAO {
         return null;
     }
 
+    private void listGamesHelper(ResultSet rs, String authToken) throws DataAccessException {
+        try {
+            boolean unauthorized = true;
+            while (rs.next()) {
+                if (rs.getString("authToken").equals(authToken)) {
+                    unauthorized = false;
+                }
+            }
+            if (unauthorized) {
+                throw new DataAccessException("Error: Unauthorized access.");
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
+        }
+    }
+
     @Override
     public Collection<GameData> listGames(String authToken) throws DataAccessException {
-        configureDatabase();
+        configDatabase();
         var gameList = new ArrayList<GameData>();
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM auths";
             try (var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
-                    boolean unauth = true;
-                    while (rs.next()) {if (rs.getString("authToken").equals(authToken)) {unauth = false;}}
-                    if(unauth){throw new DataAccessException("Error: Unauthorized access.");}
+                    listGamesHelper(rs, authToken);
                 }
             }
             statement = "SELECT * FROM games";
@@ -112,6 +126,7 @@ public class SQLGameDAO implements GameDAO {
                         gameList.add(new GameData(gameID, whiteUsername, blackUsername, gameName, game));
                     }
                 }
+
             }
         } catch (
                 Exception e) {
@@ -123,7 +138,7 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public void updateGame(int gameID, GameData game) throws DataAccessException {
-        configureDatabase();
+        configDatabase();
         if (getGame(gameID) == null || gameID != game.gameID()) {
             throw new DataAccessException("Error: Incorrect game ID or game.");
         }
@@ -144,7 +159,7 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public void clear() throws DataAccessException {
-        configureDatabase();
+        configDatabase();
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "TRUNCATE games";
             try (var pStatement = conn.prepareStatement(statement)) {
