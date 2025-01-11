@@ -46,4 +46,9 @@ public class ServerFacadeTests {
         Assertions.assertTrue(true);
     }
 
+    @Test
+    public void sample2Test() {
+        Assertions.assertTrue(true);
+    }
+
 }
