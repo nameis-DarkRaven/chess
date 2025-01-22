@@ -35,30 +35,6 @@ public class ChessPiece {
         return type;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ChessPiece that = (ChessPiece) o;
-        return color == that.color && type == that.type;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(color, type);
-    }
-
-    @Override
-    public String toString() {
-        return "ChessPiece{" +
-                "color=" + color +
-                ", type=" + type +
-                '}';
-    }
 
     /**
      * Calculates all the positions a chess piece can move to.
@@ -134,6 +110,8 @@ public class ChessPiece {
         if (this.color == ChessGame.TeamColor.WHITE) {
             if (row == 2) {
                 addMove(row + 1, column, possibleMoves, myPosition, board, null);
+                addPawnMove(row + 1, column + 1, possibleMoves, myPosition, board, null);
+                addPawnMove(row + 1, column - 1, possibleMoves, myPosition, board, null);
                 if (board.getPiece(new ChessPosition(row + 1, column)) == null && board.getPiece(new ChessPosition(row + 2, column)) == null) {
                     addMove(row + 2, column, possibleMoves, myPosition, board, null);
                 }
@@ -155,6 +133,8 @@ public class ChessPiece {
         if (this.color == ChessGame.TeamColor.BLACK) {
             if (row == 7) {
                 addMove(row - 1, column, possibleMoves, myPosition, board, null);
+                addPawnMove(row - 1, column + 1, possibleMoves, myPosition, board, null);
+                addPawnMove(row - 1, column - 1, possibleMoves, myPosition, board, null);
                 if (board.getPiece(new ChessPosition(row - 1, column)) == null && board.getPiece(new ChessPosition(row - 2, column)) == null) {
                     addMove(row - 2, column, possibleMoves, myPosition, board, null);
                 }
@@ -241,5 +221,30 @@ public class ChessPiece {
         int row = position.getRow();
         int column = position.getColumn();
         return row <= 8 && row > 0 && column <= 8 && column > 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessPiece that = (ChessPiece) o;
+        return color == that.color && type == that.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(color, type);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessPiece{" +
+                "color=" + color +
+                ", type=" + type +
+                '}';
     }
 }

@@ -7,6 +7,21 @@ public class ChessPosition {
     private int row;
     private int column;
 
+    public ChessPosition(int row, int col) {
+        this.row = row;
+        this.column = col;
+    }
+
+
+    public int getRow() {
+        return row;
+    }
+
+
+    public int getColumn() {
+        return column;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -30,20 +45,5 @@ public class ChessPosition {
                 "row=" + row +
                 ", column=" + column +
                 '}';
-    }
-
-    public ChessPosition(int row, int col) {
-        this.row = row;
-        this.column = col;
-    }
-
-
-    public int getRow() {
-        return row;
-    }
-
-
-    public int getColumn() {
-        return column;
     }
 }
