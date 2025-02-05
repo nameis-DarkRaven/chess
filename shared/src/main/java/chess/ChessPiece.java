@@ -112,7 +112,7 @@ public class ChessPiece {
                 addMove(row + 1, column, possibleMoves, myPosition, board, null);
                 addPawnMove(row + 1, column + 1, possibleMoves, myPosition, board, null);
                 addPawnMove(row + 1, column - 1, possibleMoves, myPosition, board, null);
-                if (board.getPiece(new ChessPosition(row + 1, column)) == null && board.getPiece(new ChessPosition(row + 2, column)) == null) {
+                if (board.getPiece(new ChessPosition(row + 1, column)) == null) {
                     addMove(row + 2, column, possibleMoves, myPosition, board, null);
                 }
             } else if (row == 7) {
@@ -135,7 +135,7 @@ public class ChessPiece {
                 addMove(row - 1, column, possibleMoves, myPosition, board, null);
                 addPawnMove(row - 1, column + 1, possibleMoves, myPosition, board, null);
                 addPawnMove(row - 1, column - 1, possibleMoves, myPosition, board, null);
-                if (board.getPiece(new ChessPosition(row - 1, column)) == null && board.getPiece(new ChessPosition(row - 2, column)) == null) {
+                if (board.getPiece(new ChessPosition(row - 1, column)) == null) {
                     addMove(row - 2, column, possibleMoves, myPosition, board, null);
                 }
             } else if (row == 2) {
