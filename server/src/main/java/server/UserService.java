@@ -1,14 +1,14 @@
 package server;
 
-import dataaccess.AuthDAO;
-import dataaccess.DataAccessException;
-import dataaccess.UserDAO;
-import model.UserData;
-import model.AuthData;
+import dataaccess.*;
+import exceptions.AlreadyTakenException;
+import exceptions.BadRequestException;
+import exceptions.DataAccessException;
+import exceptions.UnauthorizedException;
+import model.*;
 import org.mindrot.jbcrypt.BCrypt;
 import requests.*;
-import results.LoginResult;
-import results.RegisterResult;
+import results.*;
 
 import java.util.UUID;
 

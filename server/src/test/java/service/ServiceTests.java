@@ -1,6 +1,10 @@
 package service;
 
 import chess.ChessGame;
+import exceptions.AlreadyTakenException;
+import exceptions.BadRequestException;
+import exceptions.DataAccessException;
+import exceptions.UnauthorizedException;
 import model.GameData;
 import org.junit.jupiter.api.*;
 

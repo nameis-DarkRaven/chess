@@ -6,6 +6,7 @@ import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
 import chess.InvalidMoveException;
+import exceptions.DataAccessException;
 import model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -32,7 +33,7 @@ public class SQLDAOTests {
     }
 
     @AfterEach
-    public void fullClear() throws DataAccessException{
+    public void fullClear() throws DataAccessException {
         users.clear();
         auths.clear();
         games.clear();
