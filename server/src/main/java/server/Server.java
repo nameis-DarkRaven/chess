@@ -2,10 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.*;
-import exceptions.AlreadyTakenException;
-import exceptions.BadRequestException;
-import exceptions.DataAccessException;
-import exceptions.UnauthorizedException;
+import exceptions.*;
 import model.*;
 import requests.*;
 import results.*;
