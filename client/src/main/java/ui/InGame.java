@@ -3,9 +3,7 @@ package ui;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
-import static ui.EscapeSequences.*; // all characters and text/background colors
-
-public class BoardUI {
+public class InGame {
     //Board dimensions
     private static final int BOARD_SIZE_IN_SQUARES = 10;
     private static final int SQUARE_SIZE_IN_PADDED_CHARS = 1;
