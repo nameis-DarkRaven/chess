@@ -57,11 +57,11 @@ public class Client {
     public String register(String... params) throws BadRequestException {
         try {
             if (params.length == 3) {
-                state = State.loggedIn;
                 user = new UserData(params[0], params[1], params[2]);
                 RegisterResult result = server.register
                         (new RegisterRequest(user.username(), user.password(), user.email()));
                 auth = new AuthData(result.username(), result.authToken());
+                state = State.loggedIn;
                 //websocket stuff
                 return String.format("Signed in as %s.", result.username());
             }
@@ -73,10 +73,10 @@ public class Client {
 
     public String logIn(String... params) throws BadRequestException {
         if (params.length == 2) {
-            state = State.loggedIn;
             user = new UserData(params[0], params[1], null);
             LoginResult result = server.login(new LoginRequest(user.username(), user.password()));
             auth = new AuthData(result.username(), result.authToken());
+            state = State.loggedIn;
             //websocket stuff
             return String.format("Signed in as %s.", result.username());
         }
@@ -85,8 +85,8 @@ public class Client {
 
     public String logOut() throws BadRequestException {
         assertLoggedIn();
-        state = State.loggedOut;
         server.logout(new LogoutRequest(auth.authToken()));
+        state = State.loggedOut;
         //websocket stuff
         return String.format("See you soon, %s!", user);
     }
@@ -127,11 +127,11 @@ public class Client {
     public String joinGame(String... params) throws BadRequestException {
         assertLoggedIn();
         if (params.length == 2) {
-            state = State.inGame;
             inGame = new InGameClient();
             ChessGame.TeamColor color = (params[1].equalsIgnoreCase("WHITE")) ?
                     ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
             server.joinGame(new JoinGameRequest(auth.authToken(), color, Integer.parseInt(params[0])));
+            state = State.inGame;
             return String.format("You have joined game %s as %s", params[1], params[0].toUpperCase());
         }
         throw new BadRequestException("Expected: <gameID> [WHITE|BLACK]");
