@@ -85,52 +85,25 @@ public class SQLGameDAO implements GameDAO {
         return null;
     }
 
-    private void listGamesHelper(ResultSet rs, String authToken) throws DataAccessException {
-        try {
-            boolean unauthorized = true;
-            while (rs.next()) {
-                if (rs.getString("authToken").equals(authToken)) {
-                    unauthorized = false;
-                }
-            }
-            if (unauthorized) {
-                throw new DataAccessException("Error: Unauthorized access.");
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
-        }
-    }
-
     @Override
-    public Collection<GameData> listGames(String authToken) throws DataAccessException {
+    public Collection<GameData> listGames() throws DataAccessException {
         configDatabase();
         var gameList = new ArrayList<GameData>();
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT * FROM auths";
+            var statement = "SELECT * FROM games";
             try (var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
-                    listGamesHelper(rs, authToken);
-                }
-            }
-            statement = "SELECT * FROM games";
-            try (var ps = conn.prepareStatement(statement)) {
-                try (var rs = ps.executeQuery()) {
-                    int gameID;
-                    String blackUsername, whiteUsername, gameName;
-                    ChessGame game;
                     while (rs.next()) {
-                        gameID = rs.getInt("gameID");
-                        blackUsername = rs.getString("blackUsername");
-                        whiteUsername = rs.getString("whiteUsername");
-                        gameName = rs.getString("gameName");
-                        game = new Gson().fromJson(rs.getString("game"), ChessGame.class);
+                        int gameID = rs.getInt("gameID");
+                        String blackUsername = rs.getString("blackUsername");
+                        String whiteUsername = rs.getString("whiteUsername");
+                        String gameName = rs.getString("gameName");
+                        ChessGame game = new Gson().fromJson(rs.getString("game"), ChessGame.class);
                         gameList.add(new GameData(gameID, whiteUsername, blackUsername, gameName, game));
                     }
                 }
-
             }
-        } catch (
-                Exception e) {
+        } catch (Exception e) {
             throw new DataAccessException(String.format
                     ("Unable to read data: %s", e.getMessage()));
         }
