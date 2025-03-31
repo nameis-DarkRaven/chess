@@ -113,10 +113,6 @@ public class Server {
             ListGamesResult listGamesResult = gameService.listGames(new ListGamesRequest(auth));
             response.status(200);
             return new Gson().toJson(listGamesResult);
-        } catch (DataAccessException e) {
-            response.status(500);
-            return new Gson().toJson(new ErrorMessage(e.getMessage()));
-
         } catch (UnauthorizedException e) {
             response.status(401);
             return new Gson().toJson(new ErrorMessage(e.getMessage()));

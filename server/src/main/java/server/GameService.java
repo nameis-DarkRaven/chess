@@ -23,17 +23,18 @@ public class GameService {
         this.users = users;
     }
 
-    public ListGamesResult listGames(ListGamesRequest request) throws DataAccessException, UnauthorizedException {
+    public ListGamesResult listGames(ListGamesRequest request) throws UnauthorizedException {
         try {
             AuthData auth = auths.getAuth(request.authToken());
             if (auth == null) {
                 throw new UnauthorizedException("Error: Unauthorized access.");
             }
-            Collection<GameData> gamesList = games.listGames(auth.authToken());
+            Collection<GameData> gamesList = games.listGames();
             return new ListGamesResult(gamesList);
         } catch (DataAccessException e) {
             throw new UnauthorizedException("Error: Unauthorized access.");
         }
+
     }
 
     public CreateGameResult createGame(CreateGameRequest request)
@@ -66,14 +67,15 @@ public class GameService {
             UserData user = users.getUser(auth.username());
             GameData game = games.getGame(request.gameID());
             if (request.playerColor() == ChessGame.TeamColor.BLACK) {
-                if (game.blackUsername() == null) {
+                if (user.username().equals(game.blackUsername()) || game.blackUsername() == null) {
                     games.updateGame(game.gameID(), new GameData(game.gameID(), game.whiteUsername(),
                             user.username(), game.gameName(), game.game()));
-                } else {
+                }
+                else {
                     throw new AlreadyTakenException("Error: Another player has already taken that spot.");
                 }
             } else if (request.playerColor() == ChessGame.TeamColor.WHITE) {
-                if (game.whiteUsername() == null) {
+                if (user.username().equals(game.whiteUsername()) || game.whiteUsername() == null) {
                     games.updateGame(game.gameID(), new GameData(game.gameID(), user.username(),
                             game.blackUsername(), game.gameName(), game.game()));
                 } else {
