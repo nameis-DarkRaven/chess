@@ -2,20 +2,21 @@ package dataaccess;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.ChessPosition;
-import chess.InvalidMoveException;
+import chess.*;
 import exceptions.DataAccessException;
+import exceptions.UnauthorizedException;
 import model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import server.UserService;
+import requests.ListGamesRequest;
+import results.ListGamesResult;
+import server.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 public class SQLDAOTests {
     private static UserDAO users;
@@ -23,6 +24,7 @@ public class SQLDAOTests {
     private static GameDAO games;
 
     private static UserService userService;
+    private static GameService gameService;
 
     @BeforeAll
     public static void init() {
@@ -30,6 +32,7 @@ public class SQLDAOTests {
         auths = new SQLAuthDAO();
         games = new SQLGameDAO();
         userService = new UserService(users, auths);
+        gameService = new GameService(auths, games, users);
     }
 
     @AfterEach
@@ -41,44 +44,44 @@ public class SQLDAOTests {
 
     @Test
     public void goodCreateUserTest() throws DataAccessException {
-        assertEquals(users.createUser(new UserData("user", "pass", "mail@mail.com")),
-                new UserData("user", "pass", "mail@mail.com"));
+        assertEquals(new UserData("user", "pass", "mail@mail.com"),
+                users.createUser(new UserData("user", "pass", "mail@mail.com")));
     }
 
     @Test
-    public void badCreateUserTest(){
-        assertThrows(DataAccessException.class, ()->users.createUser(new UserData(null, "pass", "mail@mail.com")));
-        assertThrows(DataAccessException.class, ()->users.createUser(new UserData("user", "pass", null)));
-        assertThrows(DataAccessException.class, ()->users.createUser(new UserData("user", null, "mail@mail.com")));
+    public void badCreateUserTest() {
+        assertThrows(DataAccessException.class, () -> users.createUser(new UserData(null, "pass", "mail@mail.com")));
+        assertThrows(DataAccessException.class, () -> users.createUser(new UserData("user", "pass", null)));
+        assertThrows(DataAccessException.class, () -> users.createUser(new UserData("user", null, "mail@mail.com")));
     }
 
     @Test
-    public void goodGetUserTest() throws DataAccessException{
+    public void goodGetUserTest() throws DataAccessException {
         UserData user = users.createUser(new UserData("user", "pass", "mail@mail.com"));
         assertEquals(user, users.getUser(user.username()));
     }
 
     @Test
-    public void nullGetUserTest() throws DataAccessException{
+    public void nullGetUserTest() throws DataAccessException {
         UserData user = new UserData("user", "pass", "mail@mail.com");
         assertNull(users.getUser(user.username()));
     }
 
     @Test
-    public void goodCreateAuthTest() throws DataAccessException{
+    public void goodCreateAuthTest() throws DataAccessException {
         auths.createAuth(new AuthData("user1", userService.generateToken()));
         auths.createAuth(new AuthData("user2", userService.generateToken()));
         assertEquals(2, auths.authsSize());
     }
 
     @Test
-    public void badCreateAuthTest(){
-        assertThrows(DataAccessException.class, ()-> auths.createAuth(new AuthData(null, userService.generateToken())));
-        assertThrows(DataAccessException.class, ()-> auths.createAuth(new AuthData("user2", null)));
+    public void badCreateAuthTest() {
+        assertThrows(DataAccessException.class, () -> auths.createAuth(new AuthData(null, userService.generateToken())));
+        assertThrows(DataAccessException.class, () -> auths.createAuth(new AuthData("user2", null)));
     }
 
     @Test
-    public void goodGetAuthTest() throws DataAccessException{
+    public void goodGetAuthTest() throws DataAccessException {
         AuthData auth = auths.createAuth(new AuthData("user1", userService.generateToken()));
         assertEquals(auth, auths.getAuth(auth.authToken()));
     }
@@ -89,7 +92,7 @@ public class SQLDAOTests {
     }
 
     @Test
-    public void goodDeleteAuthTest() throws DataAccessException{
+    public void goodDeleteAuthTest() throws DataAccessException {
         String authToken = userService.generateToken();
         auths.createAuth(new AuthData("user1", authToken));
         auths.deleteAuth(authToken);
@@ -97,47 +100,47 @@ public class SQLDAOTests {
     }
 
     @Test
-    public void nullDeleteAuthTest() throws DataAccessException{
+    public void nullDeleteAuthTest() throws DataAccessException {
         String authToken = userService.generateToken();
         auths.deleteAuth(authToken);
-        assertEquals(0,auths.authsSize());
+        assertEquals(0, auths.authsSize());
     }
 
     @Test
-    public void goodCreateGameTest() throws DataAccessException{
+    public void goodCreateGameTest() throws DataAccessException {
         int gameID = games.createGame("Game1");
-        assertEquals(1,gameID);
+        assertEquals(1, gameID);
         gameID = games.createGame("Game2");
-        assertEquals(2,gameID);
+        assertEquals(2, gameID);
     }
 
     @Test
-    public void badCreateGameTest(){
-        assertThrows(DataAccessException.class, ()-> games.createGame(null));
+    public void badCreateGameTest() {
+        assertThrows(DataAccessException.class, () -> games.createGame(null));
     }
 
     @Test
-    public void goodGetGameTest() throws DataAccessException{
+    public void goodGetGameTest() throws DataAccessException {
         int gameID = games.createGame("Game1");
         games.createGame("Game2");
         assertEquals(gameID, games.getGame(gameID).gameID());
     }
 
     @Test
-    public void badGetGameTest() throws DataAccessException{
+    public void badGetGameTest() throws DataAccessException {
         assertNull(games.getGame(1));
     }
 
     @Test
-    public void goodListGamesTest() throws DataAccessException{
+    public void goodListGamesTest() throws DataAccessException {
         AuthData auth = auths.createAuth(new AuthData("user", "token"));
         Collection<GameData> expectedGamesList = new ArrayList<>();
 
-        assertEquals(expectedGamesList, games.listGames(auth.authToken()));
+        assertEquals(expectedGamesList, games.listGames());
 
         int gameID1 = games.createGame("Game1");
         int gameID2 = games.createGame("Game2");
-        Collection<GameData> gamesList = games.listGames(auth.authToken());
+        Collection<GameData> gamesList = games.listGames();
 
         expectedGamesList.add(games.getGame(gameID1));
         expectedGamesList.add(games.getGame(gameID2));
@@ -145,10 +148,10 @@ public class SQLDAOTests {
     }
 
     @Test
-    public void badListGamesTest() throws DataAccessException{
-        assertThrows(DataAccessException.class, ()-> games.listGames("token"));
-        auths.createAuth(new AuthData("user","newToken"));
-        assertThrows(DataAccessException.class, ()-> games.listGames("token"));
+    public void badListGamesTest() throws DataAccessException {
+        assertThrows(UnauthorizedException.class, () -> gameService.listGames(new ListGamesRequest("")));
+        auths.createAuth(new AuthData("user", "newToken"));
+        assertThrows(UnauthorizedException.class, () -> gameService.listGames(new ListGamesRequest("")));
     }
 
     @Test
@@ -156,8 +159,8 @@ public class SQLDAOTests {
         int gameID = games.createGame("Game1");
         GameData oldGame = games.getGame(gameID);
         ChessGame game = oldGame.game();
-        game.makeMove(new ChessMove(new ChessPosition(2,1),
-                new ChessPosition(3,1), null));
+        game.makeMove(new ChessMove(new ChessPosition(2, 1),
+                new ChessPosition(3, 1), null));
         GameData updatedGame = new GameData(gameID, oldGame.whiteUsername(),
                 oldGame.blackUsername(), oldGame.gameName(), game);
         games.updateGame(gameID, updatedGame);
@@ -169,23 +172,22 @@ public class SQLDAOTests {
         assertEquals(updatedGame, games.getGame(gameID));
 
         AuthData auth = auths.createAuth(new AuthData("user", "auth"));
-        assertEquals(1, games.listGames(auth.authToken()).size());
+        assertEquals(1, games.listGames().size());
     }
 
     @DisplayName("Update game with bad input.")
     @Test
-    public void badUpdateGameTest() throws DataAccessException{
+    public void badUpdateGameTest() throws DataAccessException {
         int gameID = games.createGame("Game1");
-        assertThrows(DataAccessException.class, ()->games.updateGame(0,
+        assertThrows(DataAccessException.class, () -> games.updateGame(0,
                 games.getGame(gameID)));
     }
 
     @DisplayName("Update game that does not exist.")
     @Test
     public void existUpdateGameTest() {
-        assertThrows(DataAccessException.class, ()->games.updateGame(1, games.getGame(1)));
+        assertThrows(DataAccessException.class, () -> games.updateGame(1, games.getGame(1)));
     }
-
 
 
 }
