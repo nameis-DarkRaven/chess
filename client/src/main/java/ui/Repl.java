@@ -1,6 +1,7 @@
 package ui;
 
 import java.util.Scanner;
+import ui.EscapeSequences;
 
 public class Repl {
     private final Client client;
@@ -11,7 +12,10 @@ public class Repl {
     }
 
     public void run() {
-        System.out.println("Welcome to Chess. Type \"help\" to begin.");
+        System.out.println((EscapeSequences.SET_TEXT_COLOR_CROWN + "♕ ") +
+                (EscapeSequences.RESET_TEXT_COLOR + "Welcome to Chess") +
+                (EscapeSequences.SET_TEXT_COLOR_CROWN + " ♕"));
+        System.out.print(EscapeSequences.RESET_TEXT_COLOR);
         System.out.print(client.help());
 
         Scanner scanner=new Scanner(System.in);
