@@ -40,7 +40,7 @@ public class Client {
                 case "redraw" -> redraw();
                 case "leave" -> leave();
                 case "quit" -> "quit";
-                case "clear" -> clear();
+                case "clear" -> clear(params);
                 default -> help();
             };
         } catch (BadRequestException e) {
@@ -48,10 +48,16 @@ public class Client {
         }
     }
 
-    public String clear() throws BadRequestException {
+    public String clear(String... params) throws BadRequestException {
         try {
-            server.clear();
-            return "Cleared.";
+            if(params.length != 1){
+                throw new BadRequestException("Unauthorized.");
+            }
+            if (params[0].equals("biscuit")) {
+                server.clear();
+                return "Cleared.";
+            }
+            throw new BadRequestException("Unauthorized.");
         } catch (BadRequestException e) {
             throw new BadRequestException(e.getMessage());
         }
@@ -68,6 +74,7 @@ public class Client {
     public String register(String... params) throws BadRequestException {
         try {
             if (params.length == 3) {
+                assertLoggedOut();
                 user = new UserData(params[0], params[1], params[2]);
                 RegisterResult result = server.register
                         (new RegisterRequest(user.username(), user.password(), user.email()));
@@ -77,13 +84,14 @@ public class Client {
                 return String.format("Signed in as %s.", result.username());
             }
         } catch (BadRequestException e) {
-            throw new BadRequestException(e.getMessage());
+            throw new BadRequestException("Username already taken.");
         }
         throw new BadRequestException("Expected: <username> <password> <email>");
     }
 
     public String logIn(String... params) throws BadRequestException {
         if (params.length == 2) {
+            assertLoggedOut();
             user = new UserData(params[0], params[1], null);
             LoginResult result = server.login(new LoginRequest(user.username(), user.password()));
             auth = new AuthData(result.username(), result.authToken());
@@ -98,6 +106,7 @@ public class Client {
         assertLoggedIn();
         server.logout(new LogoutRequest(auth.authToken()));
         state = State.loggedOut;
+        auth = null;
         //websocket stuff
         return String.format("See you soon, %s!", user.username());
     }
@@ -137,22 +146,27 @@ public class Client {
 
     public String joinGame(String... params) throws BadRequestException {
         assertLoggedIn();
-        if (params.length == 2) {
-            if (params[1].equalsIgnoreCase("white") || params[1].equalsIgnoreCase("black")) {
-                ChessGame.TeamColor color = (params[1].equalsIgnoreCase("WHITE")) ?
-                        ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
-                server.joinGame(new JoinGameRequest(auth.authToken(), color, Integer.parseInt(params[0])));
-                inGame = new InGameClient();
-                state = State.inGame;
-                System.out.printf("You have joined game %s as %s%n\n", params[0], params[1].toUpperCase());
-                inGame.printBoard(color);
-                return "";
+        try {
+            if (params.length == 2) {
+                if (params[1].equalsIgnoreCase("white") || params[1].equalsIgnoreCase("black")) {
+                    ChessGame.TeamColor color = (params[1].equalsIgnoreCase("WHITE")) ?
+                            ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+                    server.joinGame(new JoinGameRequest(auth.authToken(), color, Integer.parseInt(params[0])));
+                    inGame = new InGameClient();
+                    state = State.inGame;
+                    System.out.printf("You have joined game %s as %s%n\n", params[0], params[1].toUpperCase());
+                    inGame.printBoard(color);
+                    return "";
+                }
             }
+        }catch (BadRequestException e){
+            throw new BadRequestException("Spot already taken.");
         }
         throw new BadRequestException("Expected: <gameID> [WHITE|BLACK]");
     }
 
-    private String redraw() {
+    private String redraw() throws BadRequestException {
+        assertInGame();
         if (user.username().equals(game.blackUsername())) {
             inGame.printBoard(ChessGame.TeamColor.BLACK);
         } else {
@@ -196,9 +210,22 @@ public class Client {
 
     private void assertLoggedIn() throws BadRequestException {
         if (state == State.loggedOut) {
-            throw new BadRequestException("You must sign in.");
+            throw new BadRequestException("You must log in.");
         }
     }
+
+    private void assertLoggedOut() throws BadRequestException {
+        if (state == State.loggedIn) {
+            throw new BadRequestException("You are already logged in.");
+        }
+    }
+
+    private void assertInGame() throws BadRequestException {
+        if (state == State.inGame) {
+            throw new BadRequestException("You must leave the game first.");
+        }
+    }
+
 }
 
 

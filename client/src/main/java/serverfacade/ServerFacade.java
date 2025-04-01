@@ -59,7 +59,7 @@ public class ServerFacade {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
-            if (request.getClass() != LoginRequest.class && request.getClass() != RegisterRequest.class) {
+            if (request != null && request.getClass() != LoginRequest.class && request.getClass() != RegisterRequest.class) {
                 http.addRequestProperty("authorization", auth);
             }
             if (Objects.equals(method, "POST") || Objects.equals(method, "PUT")) {
