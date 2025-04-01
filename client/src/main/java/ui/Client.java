@@ -1,6 +1,6 @@
 package ui;
 
-import chess.ChessGame;
+import chess.*;
 import com.google.gson.Gson;
 import exceptions.BadRequestException;
 import model.*;
@@ -16,6 +16,7 @@ public class Client {
     private State state = State.loggedOut;
     private UserData user;
     private AuthData auth;
+    private GameData game;
     private InGameClient inGame;
 
     public Client(String serverURL) {
@@ -36,6 +37,8 @@ public class Client {
                 case "games" -> listGames();
                 case "create" -> createGame(params);
                 case "join" -> joinGame(params);
+                case "redraw" -> redraw();
+                case "leave" -> leave();
                 case "quit" -> "quit";
                 case "clear" -> clear();
                 default -> help();
@@ -52,6 +55,14 @@ public class Client {
         } catch (BadRequestException e) {
             throw new BadRequestException(e.getMessage());
         }
+    }
+
+    public String leave() {
+        state = State.loggedIn;
+//        String gameName = game.gameName();
+        game = null;
+//        return String.format("Left %s", gameName);
+        return "";
     }
 
     public String register(String... params) throws BadRequestException {
@@ -88,7 +99,7 @@ public class Client {
         server.logout(new LogoutRequest(auth.authToken()));
         state = State.loggedOut;
         //websocket stuff
-        return String.format("See you soon, %s!", user);
+        return String.format("See you soon, %s!", user.username());
     }
 
     public String listGames() throws BadRequestException {
@@ -127,16 +138,28 @@ public class Client {
     public String joinGame(String... params) throws BadRequestException {
         assertLoggedIn();
         if (params.length == 2) {
-            inGame = new InGameClient();
-            ChessGame.TeamColor color = (params[1].equalsIgnoreCase("WHITE")) ?
-                    ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
-            server.joinGame(new JoinGameRequest(auth.authToken(), color, Integer.parseInt(params[0])));
-            state = State.inGame;
-            return String.format("You have joined game %s as %s", params[1], params[0].toUpperCase());
+            if (params[1].equalsIgnoreCase("white") || params[1].equalsIgnoreCase("black")) {
+                ChessGame.TeamColor color = (params[1].equalsIgnoreCase("WHITE")) ?
+                        ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+                server.joinGame(new JoinGameRequest(auth.authToken(), color, Integer.parseInt(params[0])));
+                inGame = new InGameClient();
+                state = State.inGame;
+                System.out.printf("You have joined game %s as %s%n\n", params[0], params[1].toUpperCase());
+                inGame.printBoard(color);
+                return "";
+            }
         }
         throw new BadRequestException("Expected: <gameID> [WHITE|BLACK]");
     }
 
+    private String redraw() {
+        if (user.username().equals(game.blackUsername())) {
+            inGame.printBoard(ChessGame.TeamColor.BLACK);
+        } else {
+            inGame.printBoard(ChessGame.TeamColor.WHITE);
+        }
+        return "";
+    }
 
     public String help() {
         if (state == State.loggedOut) {
@@ -159,8 +182,17 @@ public class Client {
                     - help
                     """;
         }
-        return inGame.help();
+        return """
+                Please choose one of the following options:
+                - highlight <position> (ex. f5)
+                - move <source> <destination> <optional: promotion> (ex. f5 e4 queen)
+                - redraw
+                - resign
+                - leave
+                - help
+                """;
     }
+
 
     private void assertLoggedIn() throws BadRequestException {
         if (state == State.loggedOut) {
