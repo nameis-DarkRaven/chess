@@ -29,10 +29,11 @@ public class SQLDAOTests {
     @BeforeAll
     public static void init() {
         users = new SQLUserDAO();
-        auths = new SQLAuthDAO();
         games = new SQLGameDAO();
-        userService = new UserService(users, auths);
+        auths = new SQLAuthDAO();
+
         gameService = new GameService(auths, games, users);
+        userService = new UserService(users, auths);
     }
 
     @AfterEach
