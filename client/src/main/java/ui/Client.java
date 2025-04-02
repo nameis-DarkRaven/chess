@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 public class Client {
     private final ServerFacade server;
-    private final String serverURL;
+    //    private final String serverURL;
     private State state = State.loggedOut;
     private UserData user;
     private AuthData auth;
@@ -21,7 +21,7 @@ public class Client {
 
     public Client(String serverURL) {
         server = new ServerFacade(serverURL);
-        this.serverURL = serverURL;
+//        this.serverURL = serverURL;
     }
 
     public String eval(String input) {
@@ -48,9 +48,9 @@ public class Client {
         }
     }
 
-    public String clear(String... params) throws BadRequestException {
+    private String clear(String... params) throws BadRequestException {
         try {
-            if(params.length != 1){
+            if (params.length != 1) {
                 throw new BadRequestException("Unauthorized.");
             }
             if (params[0].equals("biscuit")) {
@@ -72,8 +72,13 @@ public class Client {
     }
 
     public String register(String... params) throws BadRequestException {
-        try {
-            if (params.length == 3) {
+        if (params.length == 3) {
+            try {
+                assertNotEmpty(params);
+            } catch (BadRequestException e){
+                throw new BadRequestException("Expected: <username> <password> <email>");
+            }
+            try {
                 assertLoggedOut();
                 user = new UserData(params[0], params[1], params[2]);
                 RegisterResult result = server.register
@@ -82,15 +87,20 @@ public class Client {
                 state = State.loggedIn;
                 //websocket stuff
                 return String.format("Signed in as %s.", result.username());
+            } catch (BadRequestException e) {
+                throw new BadRequestException("Username already taken.");
             }
-        } catch (BadRequestException e) {
-            throw new BadRequestException("Username already taken.");
         }
         throw new BadRequestException("Expected: <username> <password> <email>");
     }
 
     public String logIn(String... params) throws BadRequestException {
         if (params.length == 2) {
+            try {
+                assertNotEmpty(params);
+            } catch (BadRequestException e){
+                throw new BadRequestException("Expected: <username> <password>");
+            }
             assertLoggedOut();
             user = new UserData(params[0], params[1], null);
             LoginResult result = server.login(new LoginRequest(user.username(), user.password()));
@@ -133,6 +143,11 @@ public class Client {
 
     public String createGame(String... params) throws BadRequestException {
         assertLoggedIn();
+        try {
+            assertNotEmpty(params);
+        } catch (BadRequestException e){
+            throw new BadRequestException("Expected: <gameName>");
+        }
         if (params.length == 1) {
             try {
                 server.createGame(new CreateGameRequest(auth.authToken(), params[0]));
@@ -146,8 +161,13 @@ public class Client {
 
     public String joinGame(String... params) throws BadRequestException {
         assertLoggedIn();
-        try {
-            if (params.length == 2) {
+        if (params.length == 2) {
+            try {
+                assertNotEmpty(params);
+            } catch (BadRequestException e){
+                throw new BadRequestException("Expected: <gameID> [WHITE|BLACK]");
+            }
+            try {
                 if (params[1].equalsIgnoreCase("white") || params[1].equalsIgnoreCase("black")) {
                     ChessGame.TeamColor color = (params[1].equalsIgnoreCase("WHITE")) ?
                             ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
@@ -158,9 +178,9 @@ public class Client {
                     inGame.printBoard(color);
                     return "";
                 }
+            } catch (BadRequestException e) {
+                throw new BadRequestException("Spot already taken.");
             }
-        }catch (BadRequestException e){
-            throw new BadRequestException("Spot already taken.");
         }
         throw new BadRequestException("Expected: <gameID> [WHITE|BLACK]");
     }
@@ -223,6 +243,14 @@ public class Client {
     private void assertInGame() throws BadRequestException {
         if (state == State.inGame) {
             throw new BadRequestException("You must leave the game first.");
+        }
+    }
+
+    private void assertNotEmpty(String... params) throws BadRequestException {
+        for (String param : params) {
+            if (param.isEmpty() || param.equals(" ")) {
+                throw new BadRequestException("Unexpected input.");
+            }
         }
     }
 
