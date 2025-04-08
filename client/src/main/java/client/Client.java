@@ -1,4 +1,4 @@
-package ui;
+package client;
 
 import chess.*;
 import com.google.gson.Gson;
@@ -7,21 +7,29 @@ import model.*;
 import requests.*;
 import results.*;
 import serverfacade.ServerFacade;
+import client.websocket.*;
+import websocket.messages.*;
 
 import java.util.Arrays;
 
-public class Client {
+import static client.EscapeSequences.SET_TEXT_COLOR_RED;
+
+public class Client implements NotificationHandler{
+//public class Client {
     private final ServerFacade server;
-    //    private final String serverURL;
-    private State state = State.loggedOut;
+    private final String serverURL;
+    private State state;
     private UserData user;
     private AuthData auth;
     private GameData game;
-    private InGameClient inGame;
+    private GameClient inGame;
+    private WebSocketFacade ws;
 
-    public Client(String serverURL) {
+        public Client(String serverURL) {
+        state = State.loggedOut;
         server = new ServerFacade(serverURL);
-//        this.serverURL = serverURL;
+        this.serverURL = serverURL;
+
     }
 
     public String eval(String input) {
@@ -114,7 +122,7 @@ public class Client {
     }
 
     public String logOut() throws BadRequestException {
-        if (state == State.inGame){
+        if (state == State.inGame) {
             throw new BadRequestException("You must leave the game first.");
         }
         assertLoggedIn();
@@ -183,7 +191,7 @@ public class Client {
                     ChessGame.TeamColor color = (params[1].equalsIgnoreCase("WHITE")) ?
                             ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
                     server.joinGame(new JoinGameRequest(auth.authToken(), color, Integer.parseInt(params[0])));
-                    inGame = new InGameClient();
+                    inGame = new GameClient();
                     state = State.inGame;
                     System.out.printf("You have joined game %s as %s\n", params[0], params[1].toUpperCase());
                     inGame.printBoard(color);
@@ -204,8 +212,8 @@ public class Client {
             } catch (BadRequestException e) {
                 throw new BadRequestException("Expected: <gameID>");
             }
-            inGame = new InGameClient();
-            state = State.inGame;
+            inGame = new GameClient();
+            state = State.observing;
             inGame.printBoard(ChessGame.TeamColor.WHITE);
             return String.format("You have joined game %s as an observer.\n", params[0].toUpperCase());
         }
@@ -242,16 +250,24 @@ public class Client {
                     - quit
                     - help
                     """;
+        } else if (state == State.inGame) {
+            return """
+                    Please choose one of the following options:
+                    - highlight <position> (ex. f5)
+                    - move <source> <destination> <optional: promotion> (ex. f5 e4 queen)
+                    - redraw
+                    - resign
+                    - leave
+                    - help
+                    """;
+        } else {
+            return """
+                    - highlight <position> (ex. f5)
+                    - redraw
+                    - leave
+                    - help
+                    """;
         }
-        return """
-                Please choose one of the following options:
-                - highlight <position> (ex. f5)
-                - move <source> <destination> <optional: promotion> (ex. f5 e4 queen)
-                - redraw
-                - resign
-                - leave
-                - help
-                """;
     }
 
 
@@ -281,6 +297,10 @@ public class Client {
         }
     }
 
+    @Override
+    public void notify(ServerMessage notification) {
+//        System.out.println(SET_TEXT_COLOR_RED + notification.message()); //???
+    }
 }
 
 

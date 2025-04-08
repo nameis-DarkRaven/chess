@@ -1,11 +1,9 @@
-package ui;
+package client;
 
 import java.util.Scanner;
-import ui.EscapeSequences;
 
 public class Repl {
     private final Client client;
-    private State state;
 
     public Repl(String serverURL) {
         client=new Client(serverURL);

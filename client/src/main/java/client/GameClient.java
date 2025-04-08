@@ -1,4 +1,4 @@
-package ui;
+package client;
 
 import chess.*;
 
@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
-public class InGameClient {
+public class GameClient {
     //Board dimensions
     private static final int BOARD_SIZE_IN_SQUARES = 10;
     private static final int SQUARE_SIZE_IN_PADDED_CHARS = 1;
@@ -50,7 +50,7 @@ public class InGameClient {
             ChessPiece[][] blackPieces = new ChessPiece[8][8];
             for (ChessPiece[] row : Arrays.stream(pieces).toList()) {
                 blackPieces[8 - index] = Arrays.asList(row).reversed().toArray(new ChessPiece[8]);
-                index ++;
+                index++;
             }
             pieces = blackPieces;
         }
@@ -89,7 +89,6 @@ public class InGameClient {
         }
     }
 
-
     private String getPiece(ChessPiece piece) {
         if (piece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
             return switch (piece.getPieceType()) {
@@ -111,7 +110,6 @@ public class InGameClient {
             };
         }
     }
-
 
     private static void setBorderColor(PrintStream out) {
         out.print(EscapeSequences.SET_BG_COLOR_CROWN);

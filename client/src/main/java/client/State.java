@@ -1,7 +1,8 @@
-package ui;
+package client;
 
 public enum State {
     loggedIn,
     loggedOut,
-    inGame
+    inGame,
+    observing
 }
