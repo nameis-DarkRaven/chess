@@ -73,11 +73,8 @@ public class Client implements NotificationHandler{
     }
 
     public String leave() {
-        state = State.loggedIn;
-//        String gameName = game.gameName();
-        game = null;
-//        return String.format("Left %s", gameName);
-        return "Left game.";
+        //implement
+        return "";
     }
 
     public String register(String... params) throws BadRequestException {
