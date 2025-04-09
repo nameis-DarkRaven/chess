@@ -67,7 +67,7 @@ public class GameService {
             UserData user = users.getUser(auth.username());
             GameData game = games.getGame(request.gameID());
             if (request.playerColor() == ChessGame.TeamColor.BLACK) {
-                if (user.username().equals(game.blackUsername()) || game.blackUsername() == null) {
+                if (game.blackUsername() == null) {
                     games.updateGame(game.gameID(), new GameData(game.gameID(), game.whiteUsername(),
                             user.username(), game.gameName(), game.game()));
                 }
@@ -75,7 +75,7 @@ public class GameService {
                     throw new AlreadyTakenException("Error: Another player has already taken that spot.");
                 }
             } else if (request.playerColor() == ChessGame.TeamColor.WHITE) {
-                if (user.username().equals(game.whiteUsername()) || game.whiteUsername() == null) {
+                if (game.whiteUsername() == null) {
                     games.updateGame(game.gameID(), new GameData(game.gameID(), user.username(),
                             game.blackUsername(), game.gameName(), game.game()));
                 } else {
@@ -88,6 +88,10 @@ public class GameService {
         } catch (DataAccessException e) {
             throw new UnauthorizedException("Error: Unauthorized access.");
         }
+    }
+
+    public ChessGame getGame(int gameID) throws DataAccessException {
+        return games.getGame(gameID).game();
     }
 
 }
