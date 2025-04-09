@@ -70,33 +70,59 @@ public class WebSocketHandler {
         }
     }
 
-    private void connect(String username, Session session, ConnectCommand command) throws IOException, BadRequestException {
+    private void connect(String username, Session session, ConnectCommand command)
+            throws IOException {
+        Connection connection = new Connection(username, session);
         try {
-            connections.add(username, session);
+            connection = connections.add(command.getGameID(), username, session);
             int gameID = command.getGameID();
-            ChessGame.TeamColor color = gameService.getGame(gameID).getTeamTurn();
+            ChessGame game = gameService.getGame(gameID).game();
+            LoadGameMessage loadGameMessage = new LoadGameMessage(game);
+            sendMessage(session, loadGameMessage);
+            ChessGame.TeamColor color = game.getTeamTurn();
             var message = String.format("%s is now playing as %s", username, color.toString());
             var notification = new NotificationMessage(message);
-            connections.broadcast(username, notification);
+            connections.broadcast(command.getGameID(), username, notification);
         } catch (DataAccessException e) {
-            throw new BadRequestException(e.getMessage());
+            var remote = session.getRemote();
+            connection.sendError(remote, e.getMessage());
         }
     }
 
-    private void makeMove(String username, Session session, MakeMoveCommand command) throws IOException {
-        ChessMove move = command.move();
-        var message = String.format("%s moved %s to %s", username, move.getStartPosition(), move.getEndPosition());
-        var notification = new NotificationMessage(message);
-        connections.broadcast(username, notification);
-    }
-
-    public void makeNoise(String petName, String sound) throws BadRequestException {
+    private void makeMove(String username, Session session, MakeMoveCommand command)
+            throws IOException, UnauthorizedException {
+        Connection connection = new Connection(username, session);
         try {
-            var message = String.format("%s says %s", petName, sound);
+            int gameID = command.getGameID();
+            GameData gameData = gameService.getGame(gameID);
+            if (!username.equals(gameData.blackUsername()) || !username.equals(gameData.whiteUsername())) {
+                throw new UnauthorizedException("You must be a player to make a move.");
+            }
+            connection = connections.add(command.getGameID(), username, session);
+            ChessMove move = command.move();
+            ChessGame game = gameData.game();
+            LoadGameMessage loadGameMessage = new LoadGameMessage(game);
+            sendMessage(session, loadGameMessage);
+            var message = String.format("%s moved %s to %s", username, move.getStartPosition(), move.getEndPosition());
             var notification = new NotificationMessage(message);
-            connections.broadcast("", notification);
-        } catch (Exception ex) {
-            throw new BadRequestException(ex.getMessage());
+            connections.broadcast(command.getGameID(), username, notification);
+        } catch (DataAccessException e) {
+            var remote = session.getRemote();
+            connection.sendError(remote, e.getMessage());
         }
+    }
+
+    private void leave(String username, LeaveCommand command) throws IOException {
+        connections.remove(command.getGameID(), username);
+        var message = String.format("%s left the game.", username);
+        var notification = new NotificationMessage(message);
+        connections.broadcast(command.getGameID(), username, notification);
+    }
+
+    private void resign(String username, ResignCommand command) throws IOException {
+        connections.remove(command.getGameID(), username);
+        var message = String.format("%s resigned.", username);
+        var notification = new NotificationMessage(message);
+        connections.broadcast(command.getGameID(), username, notification);
     }
 }
