@@ -49,8 +49,6 @@ public class WebSocketHandler {
                     resign(username, resignCommand);
                 }
             }
-//deserialize twice, once to get type, second time to get other stuffs
-            saveSession(command.getGameID(), session);
         } catch (UnauthorizedException ex) {
             sendMessage(session, new ErrorMessage("Error: unauthorized"));
         } catch (Exception ex) {
