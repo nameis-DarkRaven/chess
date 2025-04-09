@@ -4,6 +4,7 @@ import chess.ChessGame;
 import chess.ChessMove;
 import com.google.gson.Gson;
 import exceptions.*;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import server.GameService;
 import server.UserService;
@@ -41,11 +42,11 @@ public class WebSocketHandler {
                 }
                 case LEAVE: {
                     LeaveCommand leaveCommand = new Gson().fromJson(msg, LeaveCommand.class);
-//                    connect(session, username, leaveCommand);
+                    leave(username, leaveCommand);
                 }
                 case RESIGN: {
                     ResignCommand resignCommand = new Gson().fromJson(msg, ResignCommand.class);
-//                    connect(session, username, (ResignCommand) command);
+                    resign(username, resignCommand);
                 }
             }
 //deserialize twice, once to get type, second time to get other stuffs
@@ -58,13 +59,9 @@ public class WebSocketHandler {
         }
     }
 
-    private void saveSession(int gameID, Session session) {
-        //session is added to our connection manager
-    }
-
-    private void sendMessage(Session session, ErrorMessage error) {
+    private void sendMessage(Session session, ServerMessage message) {
         try {
-            session.getRemote().sendString(new Gson().toJson(error));
+            session.getRemote().sendString(new Gson().toJson(message));
         } catch (IOException e) {
             System.out.println("Error: unable to send message");
         }
