@@ -85,4 +85,12 @@ public class UserService {
         }
 
     }
+
+    public AuthData getAuth(String authToken) throws UnauthorizedException {
+        try {
+            return auths.getAuth(authToken);
+        } catch (DataAccessException e) {
+            throw new UnauthorizedException("Error: Invalid authorization.");
+        }
+    }
 }
