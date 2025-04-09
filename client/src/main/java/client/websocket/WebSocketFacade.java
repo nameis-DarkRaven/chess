@@ -1,8 +1,11 @@
 package client.websocket;
 
+import chess.ChessMove;
+import client.GameClient;
 import com.google.gson.Gson;
 import exceptions.BadRequestException;
-import websocket.messages.NotificationMessage;
+import websocket.commands.*;
+import websocket.messages.*;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -38,8 +41,48 @@ public class WebSocketFacade extends Endpoint {
             throw new BadRequestException(ex.getMessage());
         }
     }
+
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
+
+    public void connect(String authToken, int gameID) throws BadRequestException {
+        try {
+            var command = new ConnectCommand(authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    public void makeMove(String authToken, int gameID, ChessMove move) throws BadRequestException {
+        try {
+            var command = new MakeMoveCommand(authToken, gameID, move);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    public void leave(String authToken, int gameID) throws BadRequestException {
+        try {
+            var command = new LeaveCommand(authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+            this.session.close();
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    public void resign(String authToken, int gameID) throws BadRequestException {
+        try {
+            var command = new ResignCommand(authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+            this.session.close();
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
 }
 
