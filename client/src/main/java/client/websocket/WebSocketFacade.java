@@ -1,9 +1,11 @@
 package client.websocket;
 
+import chess.ChessGame;
 import chess.ChessMove;
 import client.GameClient;
 import com.google.gson.Gson;
 import exceptions.BadRequestException;
+import model.GameData;
 import websocket.commands.*;
 import websocket.messages.*;
 
@@ -16,11 +18,13 @@ import java.net.URISyntaxException;
 public class WebSocketFacade extends Endpoint {
 
     Session session;
-
+    ChessGame game;
+    GameClient gameClient;
     NotificationHandler notificationHandler;
 
 
-    public WebSocketFacade(String url, NotificationHandler notificationHandler) throws BadRequestException {
+    public WebSocketFacade(String url, NotificationHandler notificationHandler, GameClient gameClient)
+            throws BadRequestException {
         try {
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/ws");
@@ -33,8 +37,21 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    NotificationMessage notification = new Gson().fromJson(message, NotificationMessage.class);
-                    notificationHandler.notify(notification);
+                    ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
+                    switch (serverMessage.getServerMessageType()){
+                        case NOTIFICATION -> {
+                            NotificationMessage notification = new Gson().fromJson(message, NotificationMessage.class);
+                            notificationHandler.notify(new NotificationMessage(message));
+                        }
+                        case ERROR -> {
+                            ErrorMessage error = new Gson().fromJson(message, ErrorMessage.class);
+                            System.out.println(error.message());
+                        }
+                        case LOAD_GAME -> {
+                            LoadGameMessage loadGame = new Gson().fromJson(message, LoadGameMessage.class);
+                            game = loadGame.game();
+                        }
+                    }
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {
@@ -50,6 +67,7 @@ public class WebSocketFacade extends Endpoint {
         try {
             var command = new ConnectCommand(authToken, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
+            gameClient.printBoard(game.getTeamTurn(), game);
         } catch (IOException e) {
             throw new BadRequestException(e.getMessage());
         }
@@ -59,6 +77,7 @@ public class WebSocketFacade extends Endpoint {
         try {
             var command = new MakeMoveCommand(authToken, gameID, move);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
+            gameClient.printBoard(game.getTeamTurn(), game);
         } catch (IOException e) {
             throw new BadRequestException(e.getMessage());
         }
