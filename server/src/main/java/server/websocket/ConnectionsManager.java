@@ -11,20 +11,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionsManager {
     public final ConcurrentHashMap<Integer, ConcurrentHashMap<String, Connection>> connections = new ConcurrentHashMap<>();
-    public final ConcurrentHashMap<Integer, GameData> games = new ConcurrentHashMap<>();
 
-    public Connection add(int gameID, GameData game, String username, Session session) {
+    public Connection add(int gameID, String username, Session session) {
         var users = connections.get(gameID);
         if (users == null) {
             ConcurrentHashMap<String, Connection> connection = new ConcurrentHashMap<>();
             connection.put(username, new Connection(username, session));
             connections.put(gameID, connection);
-            games.put(gameID, game);
         }
         ConcurrentHashMap<String, Connection> connection = connections.get(gameID);
         connection.put(username, new Connection(username, session));
         connections.put(gameID, connection);
-        games.put(gameID, game);
         return connections.get(gameID).get(username);
     }
 
@@ -48,5 +45,8 @@ public class ConnectionsManager {
         for (var c : removeList) {
             connections.remove(c.username);
         }
+    }
+    public Connection getConnection(int gameID, String username){
+        return connections.get(gameID).get(username);
     }
 }
