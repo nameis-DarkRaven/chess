@@ -122,7 +122,7 @@ public class WebSocketHandler {
             if (game.isGameOver()) {
                 throw new BadRequestException("Game is over. No moves can be made.");
             }
-            game = game.makeMove(move);
+            game.makeMove(move);
             gameData = new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
             games.updateGame(gameID, gameData);
             connection = connections.add(command.getGameID(), username, session);
