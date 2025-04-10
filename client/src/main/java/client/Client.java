@@ -14,8 +14,7 @@ import java.util.Arrays;
 
 import static client.EscapeSequences.SET_TEXT_COLOR_RED;
 
-public class Client implements NotificationHandler{
-//public class Client {
+public class Client implements NotificationHandler {
     private final ServerFacade server;
     private final String serverURL;
     private State state;
@@ -25,7 +24,7 @@ public class Client implements NotificationHandler{
     private GameClient inGame;
     private WebSocketFacade ws;
 
-        public Client(String serverURL) {
+    public Client(String serverURL) {
         state = State.loggedOut;
         server = new ServerFacade(serverURL);
         this.serverURL = serverURL;
@@ -46,8 +45,11 @@ public class Client implements NotificationHandler{
                 case "create" -> createGame(params);
                 case "join" -> joinGame(params);
                 case "redraw" -> redraw();
+                case "highlight" -> highlight(params);
+                case "move" -> move(params);
                 case "observe" -> observe(params);
                 case "leave" -> leave();
+                case "resign" -> resign();
                 case "quit" -> "quit";
                 case "clear" -> clear(params);
                 default -> help();
@@ -72,8 +74,27 @@ public class Client implements NotificationHandler{
         }
     }
 
-    public String leave() {
-        //implement
+    public String leave() throws BadRequestException {
+        assertInGame();
+
+        ws.leave(auth.authToken(), game.gameID());
+        state = State.loggedIn;
+        return "You left the game.";
+    }
+
+    public String resign() {
+
+        state = State.loggedIn;
+        return "";
+    }
+
+    public String highlight(String... params) {
+
+        return "";
+    }
+
+    public String move(String... params) {
+
         return "";
     }
 
@@ -91,7 +112,6 @@ public class Client implements NotificationHandler{
                         (new RegisterRequest(user.username(), user.password(), user.email()));
                 auth = new AuthData(result.username(), result.authToken());
                 state = State.loggedIn;
-                //websocket stuff
                 return String.format("Signed in as %s.", result.username());
             } catch (BadRequestException e) {
                 throw new BadRequestException("Username already taken.");
@@ -112,7 +132,6 @@ public class Client implements NotificationHandler{
             LoginResult result = server.login(new LoginRequest(user.username(), user.password()));
             auth = new AuthData(result.username(), result.authToken());
             state = State.loggedIn;
-            //websocket stuff
             return String.format("Signed in as %s.", result.username());
         }
         throw new BadRequestException("Expected: <username> <password>");
@@ -190,8 +209,10 @@ public class Client implements NotificationHandler{
                     server.joinGame(new JoinGameRequest(auth.authToken(), color, Integer.parseInt(params[0])));
                     inGame = new GameClient();
                     state = State.inGame;
+                    ws = new WebSocketFacade(serverURL, this, inGame);
+                    ws.connect(auth.authToken(), game.gameID());
                     System.out.printf("You have joined game %s as %s\n", params[0], params[1].toUpperCase());
-                    inGame.printBoard(color);
+                    inGame.printBoard(color, game.game());
                     return "";
                 }
             } catch (BadRequestException e) {
@@ -211,7 +232,9 @@ public class Client implements NotificationHandler{
             }
             inGame = new GameClient();
             state = State.observing;
-            inGame.printBoard(ChessGame.TeamColor.WHITE);
+            ws = new WebSocketFacade(serverURL, this, inGame);
+            ws.connect(auth.authToken(), game.gameID());
+            inGame.printBoard(ChessGame.TeamColor.WHITE, game.game());
             return String.format("You have joined game %s as an observer.\n", params[0].toUpperCase());
         }
         throw new BadRequestException("Expected <gameID>");
@@ -220,9 +243,9 @@ public class Client implements NotificationHandler{
     private String redraw() throws BadRequestException {
         assertInGame();
         if (user.username().equals(game.blackUsername())) {
-            inGame.printBoard(ChessGame.TeamColor.BLACK);
+            inGame.printBoard(ChessGame.TeamColor.BLACK, game.game());
         } else {
-            inGame.printBoard(ChessGame.TeamColor.WHITE);
+            inGame.printBoard(ChessGame.TeamColor.WHITE, game.game());
         }
         return "";
     }
@@ -295,8 +318,8 @@ public class Client implements NotificationHandler{
     }
 
     @Override
-    public void notify(ServerMessage notification) {
-//        System.out.println(SET_TEXT_COLOR_RED + notification.message()); //???
+    public void notify(NotificationMessage notification) {
+        System.out.println(SET_TEXT_COLOR_RED + notification.message()); //???
     }
 }
 
