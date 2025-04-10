@@ -13,9 +13,8 @@ public class GameClient {
     private static final int SQUARE_SIZE_IN_PADDED_CHARS = 1;
 
 
-    public void printBoard(ChessGame.TeamColor color) {
+    public void printBoard(ChessGame.TeamColor color, ChessGame game) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        ChessGame game = new ChessGame();
 
         drawHeader(out, color);
         drawBoard(out, game, color);
