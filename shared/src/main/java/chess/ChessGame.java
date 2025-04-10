@@ -8,11 +8,13 @@ import java.util.Objects;
 public class ChessGame {
     private TeamColor teamTurn;
     private ChessBoard board;
+    private boolean gameOver;
 
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
         board = new ChessBoard();
         board.resetBoard();
+        gameOver = false;
     }
 
     public TeamColor getTeamTurn() {
@@ -24,6 +26,13 @@ public class ChessGame {
         this.teamTurn = team;
     }
 
+    public boolean isGameOver(){
+        return gameOver;
+    }
+
+    public void setGameOver(){
+        gameOver = true;
+    }
 
     public enum TeamColor {
         WHITE,
@@ -72,7 +81,7 @@ public class ChessGame {
                 setTeamTurn(TeamColor.WHITE);
             }
         } else {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException(move.toString() + " is invalid.");
         }
     }
 
