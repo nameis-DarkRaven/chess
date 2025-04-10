@@ -137,7 +137,7 @@ public class ServerFacadeTests {
         JoinGameRequest whiteJoin = new JoinGameRequest(result.authToken(), ChessGame.TeamColor.WHITE, 1);
         assertNull(serverFacade.joinGame(whiteJoin));
 
-        JoinGameRequest blackJoin = new JoinGameRequest(result.authToken(), ChessGame.TeamColor.WHITE, 1);
+        JoinGameRequest blackJoin = new JoinGameRequest(result.authToken(), ChessGame.TeamColor.BLACK, 1);
         assertNull(serverFacade.joinGame(blackJoin));
     }
 
