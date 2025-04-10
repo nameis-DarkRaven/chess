@@ -22,11 +22,11 @@ public class Server {
 
 
     public int run(int desiredPort) {
+        Spark.webSocket("/ws", webSocketHandler);
+
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
-
-        Spark.webSocket("/ws", webSocketHandler);
 
         // Register your endpoints and handle exceptions here.
         Spark.post("/user", this::register);
