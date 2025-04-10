@@ -90,8 +90,12 @@ public class GameService {
         }
     }
 
-    public ChessGame getGame(int gameID) throws DataAccessException {
-        return games.getGame(gameID).game();
+    public GameData getGame(int gameID) throws DataAccessException {
+        return games.getGame(gameID);
+    }
+
+    public GameDAO getGames(){
+        return games;
     }
 
 }
