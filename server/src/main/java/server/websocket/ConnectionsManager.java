@@ -1,5 +1,7 @@
 package server.websocket;
 
+import com.google.gson.Gson;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.*;
 
